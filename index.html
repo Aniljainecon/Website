@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anil K. Jain — Economist</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #2a3f55;
+      --navy-mid: #344f6a;
+      --accent: #1a9e8f;
+      --accent-light: #2ec4b2;
+      --text: #2c2c2c;
+      --text-muted: #6b7787;
+      --text-light: #9aa3ae;
+      --bg: #fdfaf6;
+      --bg-alt: #f0ece4;
+      --border: #e2dcd4;
+      --white: #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    /* ── NAV ───────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(42, 63, 85, 0.97);
+      backdrop-filter: blur(10px);
+      padding: 0 2rem;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.25);
+    }
+
+    .nav-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--white);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent-light); }
+
+    /* ── HERO ──────────────────────────────────────────── */
+    #hero {
+      background: linear-gradient(135deg, #2a3f55 0%, #344f6a 55%, #2a5f70 100%);
+      padding: 130px 2rem 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-inner {
+      max-width: 900px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 3.5rem;
+      align-items: center;
+    }
+
+    .hero-photo {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--accent);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+    }
+
+    .hero-photo-placeholder {
+      width: 170px;
+      height: 170px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #2a4055, #2a5065);
+      border: 4px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 3.5rem;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .hero-text h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-title {
+      font-size: 1rem;
+      color: var(--accent-light);
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+    }
+
+    .hero-institution {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .tag {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8);
+      padding: 0.3rem 0.85rem;
+      border-radius: 2rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+    }
+
+    .hero-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--white);
+    }
+    .btn-primary:hover { background: var(--accent-light); }
+
+    .btn-outline {
+      background: transparent;
+      color: rgba(255,255,255,0.85);
+      border: 1.5px solid rgba(255,255,255,0.35);
+    }
+    .btn-outline:hover {
+      border-color: var(--accent-light);
+      color: var(--accent-light);
+    }
+
+    /* ── SECTIONS ──────────────────────────────────────── */
+    section { padding: 80px 2rem; }
+    section:nth-child(odd) { background: var(--bg); }
+    section:nth-child(even) { background: var(--bg-alt); }
+
+    .section-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 2.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    /* ── ABOUT ─────────────────────────────────────────── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .about-text p {
+      color: var(--text);
+      margin-bottom: 1.2rem;
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+
+    .about-sidebar h3 {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      margin-top: 1.75rem;
+    }
+
+    .about-sidebar h3:first-child { margin-top: 0; }
+
+    .about-sidebar ul {
+      list-style: none;
+    }
+
+    .about-sidebar ul li {
+      font-size: 0.9rem;
+      color: var(--text);
+      padding: 0.25rem 0;
+    }
+
+    .about-sidebar .fed-link {
+      display: inline-block;
+      margin-top: 0.75rem;
+    }
+
+    /* ── RESEARCH ──────────────────────────────────────── */
+    .research-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 2.5rem;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      color: var(--navy);
+      border-bottom-color: var(--accent);
+    }
+
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .paper-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.25rem;
+      transition: box-shadow 0.2s, border-color 0.2s;
+      position: relative;
+    }
+
+    .paper-card:hover {
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      border-color: #c8d4e8;
+    }
+
+    .paper-card .journal {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+
+    .paper-card .status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .paper-card h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 0.3rem;
+      line-height: 1.45;
+    }
+
+    .paper-card .authors {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .paper-card .abstract {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .paper-card.open .abstract { display: block; }
+
+    .paper-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .paper-links {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .paper-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--navy);
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.7rem;
+      border-radius: 3px;
+      transition: all 0.15s;
+    }
+
+    .paper-link:hover {
+      background: var(--navy);
+      color: var(--white);
+      border-color: var(--navy);
+    }
+
+    .toggle-abstract {
+      font-size: 0.75rem;
+      color: var(--text-light);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      transition: color 0.15s;
+    }
+
+    .toggle-abstract:hover { color: var(--navy); }
+
+    /* ── CV ────────────────────────────────────────────── */
+    .cv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+    }
+
+    .cv-section h3 {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cv-item {
+      margin-bottom: 1.25rem;
+      padding-left: 1rem;
+      border-left: 2px solid var(--border);
+    }
+
+    .cv-item:last-child { margin-bottom: 0; }
+
+    .cv-item .cv-title {
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--navy);
+      line-height: 1.4;
+    }
+
+    .cv-item .cv-org {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .cv-item .cv-date {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      font-weight: 500;
+      margin-top: 0.1rem;
+    }
+
+    .cv-awards ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .cv-awards ul li {
+      font-size: 0.88rem;
+      color: var(--text);
+      padding: 0.35rem 0;
+      padding-left: 1rem;
+      border-left: 2px solid var(--border);
+      margin-bottom: 0.4rem;
+      line-height: 1.45;
+    }
+
+    .cv-download {
+      margin-top: 2.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .cv-download .btn-primary { font-size: 0.88rem; padding: 0.8rem 2rem; }
+
+    /* ── CONTACT ───────────────────────────────────────── */
+    #contact { background: var(--navy) !important; }
+
+    #contact h2 {
+      color: var(--white);
+      border-bottom-color: rgba(255,255,255,0.15);
+    }
+
+    #contact .section-label { color: var(--accent-light); }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .contact-info p {
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .contact-item .icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .contact-item a, .contact-item span {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+    }
+
+    .contact-item a:hover { color: var(--accent-light); }
+
+    /* ── FOOTER ────────────────────────────────────────── */
+    footer {
+      background: #0f1a24;
+      padding: 2rem;
+      text-align: center;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* ── RESPONSIVE ────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 2rem; }
+      .hero-photo, .hero-photo-placeholder { margin: 0 auto; }
+      .hero-tags, .hero-links { justify-content: center; }
+      .hero-text h1 { font-size: 2.2rem; }
+      .about-grid { grid-template-columns: 1fr; }
+      .cv-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .nav-links { gap: 1rem; }
+      .nav-links a { font-size: 0.72rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#hero" class="nav-brand">Anil K. Jain</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#cv">CV</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-inner">
+      <div class="hero-photo-placeholder">👤</div>
+      <div class="hero-text">
+        <h1>Anil K. Jain</h1>
+        <div class="hero-title">Principal Economist</div>
+        <div class="hero-institution">Federal Reserve Board of Governors &mdash; Global Financial Institutions</div>
+        <div class="hero-tags">
+          <span class="tag">Financial Intermediation</span>
+          <span class="tag">Development Economics</span>
+          <span class="tag">Financial Markets</span>
+          <span class="tag">Network Economics</span>
+        </div>
+        <div class="hero-links">
+          <a href="#research" class="btn btn-primary">View Research</a>
+          <a href="https://www.federalreserve.gov/econresdata/anil-k-jain.htm" target="_blank" rel="noopener" class="btn btn-outline">Fed Profile ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-inner">
+      <div class="section-label">About</div>
+      <h2>Background</h2>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>I am a Principal Economist in the Global Financial Institutions section of the <a href="https://www.federalreserve.gov/econresdata/anil-k-jain.htm" target="_blank" rel="noopener" style="color: var(--navy); font-weight: 600;">Federal Reserve Board of Governors</a>. My research focuses on financial intermediation, development economics, and the intersection of financial markets and real economic outcomes.</p>
+          <p>My work examines questions such as how banks allocate credit under adverse selection, what drives nonperforming loans, and how financial policies have distributional consequences across borrowers. I also work on platform economics and public goods provision in networks.</p>
+          <p>I earned my Ph.D. in Economics from the <strong>Massachusetts Institute of Technology</strong> in 2014, and hold an M.Phil. and B.A. (Hons.) in Economics from <strong>Trinity College, Cambridge</strong>, where I received several prizes for academic excellence.</p>
+          <p>I have presented my work at major conferences and institutions worldwide, and have served on international working groups including for the BIS <a href="https://www.bis.org/cgfs/index.htm" target="_blank" rel="noopener" style="color: var(--navy); font-weight: 600;">Committee for Global Financial Stability</a>.</p>
+        </div>
+        <div class="about-sidebar">
+          <h3>Research Interests</h3>
+          <ul>
+            <li>Financial Intermediation</li>
+            <li>Development Economics</li>
+            <li>Financial Markets</li>
+            <li>Network Economics</li>
+          </ul>
+          <h3>Education</h3>
+          <ul>
+            <li>Ph.D. Economics — MIT, 2014</li>
+            <li>M.Phil. Economics — Cambridge, 2009</li>
+            <li>B.A. (Hons.) Economics — Cambridge, 2008</li>
+          </ul>
+          <h3>Contact</h3>
+          <ul>
+            <li><a href="mailto:AnilJain87@gmail.com" style="color: var(--navy);">AnilJain87@gmail.com</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section id="research">
+    <div class="section-inner">
+      <div class="section-label">Scholarship</div>
+      <h2>Research</h2>
+
+      <div class="research-tabs">
+        <button class="tab-btn active" onclick="showTab('publications', this)">Publications</button>
+        <button class="tab-btn" onclick="showTab('working', this)">Working Papers</button>
+        <button class="tab-btn" onclick="showTab('policy', this)">Policy Publications</button>
+      </div>
+
+      <!-- PUBLICATIONS -->
+      <div id="publications" class="tab-content active">
+
+        <div class="paper-card">
+          <div class="journal">Forthcoming — Journal of Political Economy: Macroeconomics</div>
+          <h3>Why are Manufacturing Plants Smaller in Developing Countries? Theory and Evidence from India</h3>
+          <div class="authors">Anil K. Jain &amp; Siddharth Kothari (IMF)</div>
+          <div class="abstract">Poorer countries (and poorer states within India) have a larger share of manufacturing employment in small plants. This paper presents empirical evidence and a theoretical model to show that this relationship is driven by greater demand for lower quality goods in poorer regions, which can be produced efficiently in small plants. First, using data for India, we show that richer households buy higher price goods and larger plants produce higher price products. Second, we develop a model that matches these facts. Finally, we find that our model explains about forty percent of the cross-state variation in the size distribution of manufacturing plants in India.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="journal">Journal of Financial Intermediation — October 2022</div>
+          <h3>Finance and Inequality: The Distributional Impacts of Bank Credit Rationing</h3>
+          <div class="authors">Anil K. Jain &amp; Ali Choudhary</div>
+          <div class="abstract">We analyze reductions in bank credit using a natural experiment where unprecedented flooding differentially affected banks that were more exposed to flooded regions in Pakistan. Using a unique dataset that covers the universe of consumer loans in Pakistan, we find that banks disproportionately reduce credit to new and less-educated borrowers following an increase in funding costs, and this credit reduction is not compensated by relatively more lending by less-affected banks.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="https://www.sciencedirect.com/science/article/pii/S1042957322000468" target="_blank" rel="noopener" class="paper-link">Journal ↗</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="journal">Journal of Banking and Finance — December 2021</div>
+          <h3>Corporate Stress and Bank Nonperforming Loans: Evidence from Pakistan</h3>
+          <div class="authors">Anil K. Jain &amp; Ali Choudhary</div>
+          <div class="abstract">Using detailed administrative Pakistani credit registry data, we show that banks with low leverage ratios are both significantly slower and less likely to recognize a loan as nonperforming than other banks that lend to the same firm. This lack of recognition impedes loan curing, with banks with low leverage ratios reporting significantly higher final default rates. Our findings are consistent with the theoretical prediction that classifying a nonperforming loan is more expensive for banks with less capital.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="journal">Economic Theory — April 2021</div>
+          <h3>The Economics of Platforms in a Walrasian Framework</h3>
+          <div class="authors">Anil K. Jain &amp; Robert Townsend (MIT)</div>
+          <div class="abstract">We present a tractable model of platform competition in a general equilibrium setting. We endogenize the size, number, and type of each platform, while allowing for different user types in utility and impact on platform costs. The model is applicable to the recent growth in digital currency platforms. The economy is Pareto efficient because platforms internalize the network effects of adding more or different types of users by offering type-specific contracts.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="journal">Journal of Development Economics — March 2020</div>
+          <h3>How Public Information Affects Asymmetrically Informed Lenders: Evidence from a Credit Registry Reform</h3>
+          <div class="authors">Anil K. Jain &amp; Ali Choudhary</div>
+          <div class="abstract">We exploit exogenous variation in a firm's public information available to banks to empirically evaluate the importance of adverse selection in the credit market using a Pakistani banking reform that reduced public information. We find that banks with private information about a firm lent relatively more to that firm following the reform, even for banks with preexisting relationships with the firm, suggesting prior relationships do not eliminate imperfect information problems.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+      </div><!-- /publications -->
+
+      <!-- WORKING PAPERS -->
+      <div id="working" class="tab-content">
+
+        <div class="paper-card">
+          <div class="status">Revision Requested — Review of Financial Studies</div>
+          <h3>Timing Lumpy Investments with Informal Bridge Loans and Clunky Formal Loans: Evidence from Thailand</h3>
+          <div class="authors">Anil K. Jain, Robert Townsend (MIT) &amp; Fan Wang (University of Houston)</div>
+          <div class="abstract">This paper theoretically and empirically explores formal and informal credit market interactions where informal credit access can help to complete a borrower's choice set. Using Thai household data, we document the co-existence of formal and informal loans for the same household. We show that households can exploit flexible short-term informal loans as bridging loans, rolling a sequence of short-term formal loans into longer-term debt, and evaluate the effects of increasing the supply of formal loans on household welfare in village economies.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="status">Revision Requested — Journal of Economic Literature</div>
+          <h3>The Sources of Researcher Variation in Economics</h3>
+          <div class="authors">Anil K. Jain, Nick Huntington-Klein (Seattle University), Claus C. Pörtner (Seattle University), and others</div>
+          <div class="abstract">We use a rigorous three-stage many-analysts design to assess how different researcher decisions—data cleaning, research design, and interpretation—affect variation in estimated treatment effects. A total of 146 research teams each completed the same causal inference task three times. We find that even when analyzing the same data, teams reach different conclusions, and that data cleaning standardization is the most powerful lever for reducing researcher variation.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="status">Revision Requested — Journal of Financial Services Research</div>
+          <h3>Identifying the Marginal Borrower under Adverse Selection: A Simple Model</h3>
+          <div class="authors">Anil K. Jain</div>
+          <div class="abstract">This paper presents a simple model of financial intermediation between a monopolist lender and credit-constrained entrepreneurs with private information. The main result is that as the lender's funding cost increases, those entrepreneur groups with a higher degree of adverse selection are more affected — facing larger credit reductions and higher interest rates.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="status">Under Review</div>
+          <h3>Do Banks Gain from Inflation? Evidence from Inflation Surprises</h3>
+          <div class="authors">Anil K. Jain &amp; Nathan Converse (Federal Reserve Board)</div>
+          <div class="abstract">Using a high-frequency event study, we examine the effect of inflation on bank profitability by analyzing banks' risk-adjusted stock returns around U.S. CPI releases. We find that bank stocks outperform the broader market on higher-than-expected inflation prints, with the relationship substantially larger during high inflation periods. The key channel is higher-than-expected inflation causing interest rates to rise and bank profits to rise through incomplete passthrough to deposit rates.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="status">Working Paper</div>
+          <h3>Credit Access and Relational Contracts: An Experiment Testing Informational and Contractual Frictions for Pakistani Farmers</h3>
+          <div class="authors">Anil K. Jain &amp; Ali Choudhary (State Bank of Pakistan)</div>
+          <div class="abstract">Using a novel three-stage experimental design in Pakistan, we document that bank lending only serves a small fraction of rural credit demand. We test informational and enforcement technology frictions and find that enforcement technology is the primary friction limiting bank lending. A motivated and interlinked intermediary may be one solution to overcome this financial friction.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="status">Working Paper</div>
+          <h3>Financing Repeat Borrowers: Designing Credible Incentives for Today and Tomorrow</h3>
+          <div class="authors">Anil K. Jain &amp; Piruz Saboury (University of Houston)</div>
+          <div class="abstract">We analyze relationship lending when borrower cash flows are not contractible and intermediation costs vary over time. Borrowers condition loan repayment on the likelihood of receiving future loans, making their beliefs about the lender's future liquidity important. The possibility of high future lending costs weakens repayment incentives and causes inefficient under-provision of credit, with implications for microfinance.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+        <div class="paper-card">
+          <div class="status">Working Paper</div>
+          <h3>Efficient Public Good Provision in Networks: Revising the Lindahl Solution</h3>
+          <div class="authors">Anil K. Jain</div>
+          <div class="abstract">I examine a model where each agent's effort provides heterogeneous benefits to others, inducing a network of opportunities for favor-trading. Focusing on the Lindahl solution as an efficient benchmark, I show that efficient mechanisms do not necessarily imply incentives for efficient investment in production technology. I provide comparative statics with network interpretations and suggest welfare-improving interventions.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+      </div><!-- /working -->
+
+      <!-- POLICY -->
+      <div id="policy" class="tab-content">
+
+        <div class="paper-card">
+          <div class="journal">Journal of Risk and Financial Management — December 2022</div>
+          <h3>Global Spillovers of a Chinese Growth Slowdown</h3>
+          <div class="authors">S. Ahmed, R. Correa, D. Dias, N. Gornermann, J. Hoek, Anil K. Jain, Edith Liu &amp; A. Wong</div>
+          <div class="abstract">This paper analyzes the potential spillovers of a slowdown in Chinese growth to the United States and the rest of the world. Through structural VAR and DSGE analyses, we find that spillovers from China have grown significantly in the past decade. Negative growth spillovers to the U.S. are amplified significantly if the shock leads to adverse global risk sentiment and monetary policy is constrained in its reaction.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <a href="#" class="paper-link">PDF ↓</a>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
+
+      </div><!-- /policy -->
+
+    </div>
+  </section>
+
+  <!-- CV -->
+  <section id="cv">
+    <div class="section-inner">
+      <div class="section-label">Curriculum Vitae</div>
+      <h2>Experience &amp; Education</h2>
+
+      <div class="cv-grid">
+        <div>
+          <div class="cv-section">
+            <h3>Professional Experience</h3>
+            <div class="cv-item">
+              <div class="cv-title">Principal Economist</div>
+              <div class="cv-org">Federal Reserve Board of Governors</div>
+              <div class="cv-date">October 2021 – Present</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">Senior Economist</div>
+              <div class="cv-org">Federal Reserve Board of Governors</div>
+              <div class="cv-date">September 2017 – September 2021</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">Economist</div>
+              <div class="cv-org">Federal Reserve Board of Governors</div>
+              <div class="cv-date">September 2014 – August 2017</div>
+            </div>
+          </div>
+
+          <div class="cv-section" style="margin-top: 2rem;">
+            <h3>Other Experience</h3>
+            <div class="cv-item">
+              <div class="cv-title">Founder</div>
+              <div class="cv-org">Arty DC</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">Founder</div>
+              <div class="cv-org">Wee Dram Club Ltd. (Whisky company)</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">Summer Analyst, Fixed Income Group</div>
+              <div class="cv-org">Morgan Stanley</div>
+              <div class="cv-date">2007</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">Summer Analyst</div>
+              <div class="cv-org">Deloitte &amp; Touche</div>
+              <div class="cv-date">2005</div>
+            </div>
+          </div>
+
+          <div class="cv-section" style="margin-top: 2rem;">
+            <h3>Teaching (MIT)</h3>
+            <div class="cv-item">
+              <div class="cv-title">Head Teaching Assistant</div>
+              <div class="cv-org">Introductory Microeconomics (14.01) — Prof. Jonathan Gruber</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">Teaching Assistant</div>
+              <div class="cv-org">Intermediate Microeconomics (14.03) — Prof. David Autor</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="cv-section">
+            <h3>Education</h3>
+            <div class="cv-item">
+              <div class="cv-title">Ph.D. Economics</div>
+              <div class="cv-org">Massachusetts Institute of Technology</div>
+              <div class="cv-date">2014</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">M.Phil. Economics</div>
+              <div class="cv-org">Cambridge University (Trinity College)</div>
+              <div class="cv-date">2009 — Stevenson Prize (Best M.Phil. student)</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">B.A. (Hons.) Economics</div>
+              <div class="cv-org">Cambridge University (Trinity College)</div>
+              <div class="cv-date">2008 — Adam Smith Prize (Best B.A. student)</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">Visiting Student</div>
+              <div class="cv-org">Massachusetts Institute of Technology</div>
+              <div class="cv-date">2007</div>
+            </div>
+          </div>
+
+          <div class="cv-section cv-awards" style="margin-top: 2rem;">
+            <h3>Honors &amp; Awards</h3>
+            <ul>
+              <li>BIS Central Bank Research Fellow (2018–2019)</li>
+              <li>John F. Kennedy Memorial Scholarship</li>
+              <li>Cambridge — Stevenson Prize (Best M.Phil. in Economics)</li>
+              <li>Cambridge — Adam Smith Prize (Best B.A. in Economics)</li>
+              <li>Trinity College — Ver Heyden de Lancey Prize (Most Distinguished Final Year)</li>
+              <li>Trinity College — Junior Scholar, Senior Scholar &amp; Research Scholar</li>
+              <li>IPA Partnership Development Grant</li>
+              <li>CFSP Special Research Grant</li>
+              <li>Centre for International Studies Summer Grant</li>
+            </ul>
+          </div>
+
+          <div class="cv-section" style="margin-top: 2rem;">
+            <h3>Professional Service</h3>
+            <div class="cv-item">
+              <div class="cv-title">Referee</div>
+              <div class="cv-org">American Economic Review &bull; American Economic Journal: Applied Economics &bull; Management Science &bull; Journal of Development Economics &bull; Economic Letters &bull; World Development &bull; Journal of Economic Inequality &bull; Journal of Economic Behavior and Organization &bull; Economic Bulletin</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">Scientific Committee</div>
+              <div class="cv-org">IFABS (Angers &amp; Medellin)</div>
+            </div>
+            <div class="cv-item">
+              <div class="cv-title">Program Evaluator</div>
+              <div class="cv-org">World Bank</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-inner">
+      <div class="section-label">Get in Touch</div>
+      <h2>Contact</h2>
+      <div class="contact-grid">
+        <div class="contact-info">
+          <p>I welcome correspondence about my research, potential collaborations, or speaking engagements.</p>
+          <div class="contact-item">
+            <div class="icon">✉</div>
+            <a href="mailto:AnilJain87@gmail.com">AnilJain87@gmail.com</a>
+          </div>
+          <div class="contact-item">
+            <div class="icon">🏛</div>
+            <span>Federal Reserve Board of Governors<br/>Washington, D.C.</span>
+          </div>
+          <div class="contact-item">
+            <div class="icon">🔗</div>
+            <a href="https://www.federalreserve.gov/econresdata/anil-k-jain.htm" target="_blank" rel="noopener">Federal Reserve Profile</a>
+          </div>
+        </div>
+        <div class="contact-info">
+          <p style="margin-bottom: 0.5rem;">For academic queries or paper requests, feel free to reach out directly by email. I aim to respond within a few days.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2026 Anil K. Jain &mdash; Principal Economist, Federal Reserve Board of Governors</p>
+  </footer>
+
+  <script>
+    function showTab(id, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function toggleAbstract(btn) {
+      const card = btn.closest('.paper-card');
+      const isOpen = card.classList.toggle('open');
+      btn.textContent = isOpen ? 'Hide abstract' : 'Show abstract';
+    }
+  </script>
+
+</body>
+</html>
