@@ -537,15 +537,55 @@
 
     /* ── RESPONSIVE ────────────────────────────────────── */
     @media (max-width: 768px) {
-      .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 2rem; }
-      .hero-photo, .hero-photo-placeholder { margin: 0 auto; }
+      /* Nav */
+      nav { padding: 0 1rem; height: 54px; }
+      .nav-brand { font-size: 0.95rem; }
+      .nav-links { gap: 0.6rem; }
+      .nav-links a { font-size: 0.68rem; letter-spacing: 0.06em; }
+
+      /* Hero */
+      #hero { padding: 90px 1.25rem 60px; }
+      .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 1.5rem; }
+      .hero-photo, .hero-photo-placeholder { margin: 0 auto; width: 130px; height: 130px; }
+      .hero-text h1 { font-size: 2rem; }
+      .hero-title { font-size: 0.9rem; }
       .hero-tags, .hero-links { justify-content: center; }
-      .hero-text h1 { font-size: 2.2rem; }
-      .about-grid { grid-template-columns: 1fr; }
-      .cv-grid { grid-template-columns: 1fr; }
-      .contact-grid { grid-template-columns: 1fr; }
-      .nav-links { gap: 1rem; }
-      .nav-links a { font-size: 0.72rem; }
+      .hero-tags { gap: 0.4rem; }
+      .tag { font-size: 0.72rem; padding: 0.25rem 0.7rem; }
+      .btn { font-size: 0.78rem; padding: 0.6rem 1.1rem; }
+
+      /* Sections */
+      section { padding: 50px 1.25rem; }
+      h2 { font-size: 1.7rem; margin-bottom: 1.75rem; }
+
+      /* About */
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .about-text p { font-size: 0.97rem; }
+
+      /* Research tabs */
+      .research-tabs { overflow-x: auto; white-space: nowrap; padding-bottom: 2px; }
+      .tab-btn { padding: 0.6rem 1rem; font-size: 0.75rem; }
+      .paper-card { padding: 1.1rem 1.25rem; }
+      .paper-card h3 { font-size: 0.93rem; }
+      .paper-card .authors { font-size: 0.8rem; }
+      .paper-card-footer { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+
+      /* CV */
+      .cv-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .cv-item .cv-title { font-size: 0.88rem; }
+      .cv-item .cv-org { font-size: 0.82rem; }
+      .cv-awards ul li { font-size: 0.84rem; }
+
+      /* Contact */
+      .contact-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+      .contact-info p { font-size: 0.93rem; }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 400px) {
+      .nav-links { display: none; }
+      .hero-text h1 { font-size: 1.75rem; }
+      .hero-links { flex-direction: column; align-items: center; }
     }
   </style>
 </head>
@@ -568,8 +608,8 @@
       <div class="hero-photo-placeholder">👤</div>
       <div class="hero-text">
         <h1>Anil K. Jain</h1>
-        <div class="hero-title">Principal Economist</div>
-        <div class="hero-institution">Federal Reserve Board of Governors &mdash; Global Financial Institutions</div>
+        <div class="hero-title">Chief of Global Financial Institutions Section</div>
+        <div class="hero-institution">Federal Reserve Board of Governors</div>
         <div class="hero-tags">
           <span class="tag">Financial Intermediation</span>
           <span class="tag">Development Economics</span>
@@ -591,7 +631,7 @@
       <h2>Background</h2>
       <div class="about-grid">
         <div class="about-text">
-          <p>I am a Principal Economist in the Global Financial Institutions section of the <a href="https://www.federalreserve.gov/econresdata/anil-k-jain.htm" target="_blank" rel="noopener" style="color: var(--navy); font-weight: 600;">Federal Reserve Board of Governors</a>. My research focuses on financial intermediation, development economics, and the intersection of financial markets and real economic outcomes.</p>
+          <p>I am the Chief of the Global Financial Institutions Section at the <a href="https://www.federalreserve.gov/econresdata/anil-k-jain.htm" target="_blank" rel="noopener" style="color: var(--navy); font-weight: 600;">Federal Reserve Board of Governors</a>. My research focuses on financial intermediation, development economics, and the intersection of financial markets and real economic outcomes.</p>
           <p>My work examines questions such as how banks allocate credit under adverse selection, what drives nonperforming loans, and how financial policies have distributional consequences across borrowers. I also work on platform economics and public goods provision in networks.</p>
           <p>I earned my Ph.D. in Economics from the <strong>Massachusetts Institute of Technology</strong> in 2014, and hold an M.Phil. and B.A. (Hons.) in Economics from <strong>Trinity College, Cambridge</strong>, where I received several prizes for academic excellence.</p>
           <p>I have presented my work at major conferences and institutions worldwide, and have served on international working groups including for the BIS <a href="https://www.bis.org/cgfs/index.htm" target="_blank" rel="noopener" style="color: var(--navy); font-weight: 600;">Committee for Global Financial Stability</a>.</p>
@@ -612,7 +652,7 @@
           </ul>
           <h3>Contact</h3>
           <ul>
-            <li><a href="mailto:AnilJain87@gmail.com" style="color: var(--navy);">AnilJain87@gmail.com</a></li>
+            <li><a href="mailto:anil.k.jain@frb.gov" style="color: var(--navy);">anil.k.jain@frb.gov</a></li>
           </ul>
         </div>
       </div>
@@ -641,7 +681,7 @@
           <div class="abstract">Poorer countries (and poorer states within India) have a larger share of manufacturing employment in small plants. This paper presents empirical evidence and a theoretical model to show that this relationship is driven by greater demand for lower quality goods in poorer regions, which can be produced efficiently in small plants. First, using data for India, we show that richer households buy higher price goods and larger plants produce higher price products. Second, we develop a model that matches these facts. Finally, we find that our model explains about forty percent of the cross-state variation in the size distribution of manufacturing plants in India.</div>
           <div class="paper-card-footer">
             <div class="paper-links">
-              <a href="#" class="paper-link">PDF ↓</a>
+              <a href="https://doi.org/10.17016/IFDP.2025.1417" target="_blank" rel="noopener" class="paper-link">PDF ↓</a>
             </div>
             <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
           </div>
@@ -654,7 +694,7 @@
           <div class="abstract">We analyze reductions in bank credit using a natural experiment where unprecedented flooding differentially affected banks that were more exposed to flooded regions in Pakistan. Using a unique dataset that covers the universe of consumer loans in Pakistan, we find that banks disproportionately reduce credit to new and less-educated borrowers following an increase in funding costs, and this credit reduction is not compensated by relatively more lending by less-affected banks.</div>
           <div class="paper-card-footer">
             <div class="paper-links">
-              <a href="https://www.sciencedirect.com/science/article/pii/S1042957322000468" target="_blank" rel="noopener" class="paper-link">Journal ↗</a>
+              <a href="https://www.sciencedirect.com/science/article/abs/pii/S104295732200050X" target="_blank" rel="noopener" class="paper-link">Journal ↗</a>
             </div>
             <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
           </div>
@@ -829,9 +869,14 @@
           <div class="cv-section">
             <h3>Professional Experience</h3>
             <div class="cv-item">
+              <div class="cv-title">Chief, Global Financial Institutions Section</div>
+              <div class="cv-org">Federal Reserve Board of Governors</div>
+              <div class="cv-date">March 2026 –</div>
+            </div>
+            <div class="cv-item">
               <div class="cv-title">Principal Economist</div>
               <div class="cv-org">Federal Reserve Board of Governors</div>
-              <div class="cv-date">October 2021 – Present</div>
+              <div class="cv-date">October 2021 – February 2026</div>
             </div>
             <div class="cv-item">
               <div class="cv-title">Senior Economist</div>
@@ -952,7 +997,7 @@
           <p>I welcome correspondence about my research, potential collaborations, or speaking engagements.</p>
           <div class="contact-item">
             <div class="icon">✉</div>
-            <a href="mailto:AnilJain87@gmail.com">AnilJain87@gmail.com</a>
+            <a href="mailto:anil.k.jain@frb.gov">anil.k.jain@frb.gov</a>
           </div>
           <div class="contact-item">
             <div class="icon">🏛</div>
@@ -972,7 +1017,7 @@
 
   <!-- FOOTER -->
   <footer>
-    <p>&copy; 2026 Anil K. Jain &mdash; Principal Economist, Federal Reserve Board of Governors</p>
+    <p>&copy; 2026 Anil K. Jain &mdash; Chief, Global Financial Institutions Section, Federal Reserve Board of Governors</p>
   </footer>
 
   <script>
