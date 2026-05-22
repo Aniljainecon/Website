@@ -406,6 +406,19 @@
       border-color: var(--navy);
     }
 
+    .coming-soon {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border: 1px dashed var(--border);
+      padding: 0.3rem 0.7rem;
+      border-radius: 3px;
+    }
+
     .toggle-abstract {
       font-size: 0.75rem;
       color: var(--text-light);
@@ -763,6 +776,19 @@
 
       <!-- WORKING PAPERS -->
       <div id="working" class="tab-content">
+
+        <div class="paper-card">
+          <div class="status">Working Paper — May 2026</div>
+          <h3>When Prices Begin to Reflect Risk: Evidence From A Reform in Hazard Insurance for U.S. Mortgages</h3>
+          <div class="authors">Matthew Carey, Ricardo Correa &amp; Anil K. Jain</div>
+          <div class="abstract">Changes in the price of risk can influence credit and investment even when the underlying risk is unchanged. We study this mechanism using a nationwide shift to more granular flood-insurance pricing that raised premiums sharply in some locations and lowered them elsewhere. Linking detailed insurance records to loan-level mortgage data, we compare census tracts experiencing larger premium increases with nearby tracts that did not. Higher-premium areas saw declines in new mortgages, smaller loan sizes, and shifts toward borrowers with weaker credit, alongside reductions in new construction and lower house prices. The results show that correcting long-standing insurance mispricing reshapes household budgets and lender behavior, generating persistent contractions in credit supply and residential investment even before affected properties reach actuarially fair rates.</div>
+          <div class="paper-card-footer">
+            <div class="paper-links">
+              <span class="coming-soon">New Version Coming Soon</span>
+            </div>
+            <button class="toggle-abstract" onclick="toggleAbstract(this)">Show abstract</button>
+          </div>
+        </div>
 
         <div class="paper-card">
           <div class="status">Revision Requested — Review of Financial Studies</div>
