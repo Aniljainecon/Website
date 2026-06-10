@@ -104,20 +104,9 @@ function getMultiplier(team) {
   return isUnderdog(team) ? UNDERDOG_MULTIPLIER : 1;
 }
 
-/** Calculate a player's current score given their picks, results, and waivers. */
-function calculateScore(playerName, teamIds, allResults, allWaivers) {
-  // Apply waivers for this player
+/** Calculate a player's current score given their picks and results. */
+function calculateScore(playerName, teamIds, allResults) {
   let activeTeamIds = [...teamIds];
-  const playerWaivers = allWaivers.filter(w => w.player_name === playerName);
-  for (const waiver of playerWaivers) {
-    const idx = activeTeamIds.indexOf(waiver.dropped_team_id);
-    if (idx !== -1) {
-      activeTeamIds.splice(idx, 1);
-      if (waiver.picked_team_id && !activeTeamIds.includes(waiver.picked_team_id)) {
-        activeTeamIds.push(waiver.picked_team_id);
-      }
-    }
-  }
 
   // Build a lookup: round → Set of advanced team_ids
   const advancedByRound = {};
