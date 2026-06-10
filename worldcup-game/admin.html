@@ -23,29 +23,7 @@
       border-top: 1px solid var(--gray-200);
       margin-top: 0.75rem;
     }
-    .waiver-form {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr auto;
-      gap: 0.75rem;
-      align-items: end;
-    }
-    @media(max-width:640px) {
-      .waiver-form { grid-template-columns: 1fr 1fr; }
-    }
-    .waiver-list { margin-top: 1.25rem; }
-    .waiver-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.5rem 0.75rem;
-      background: var(--off-white);
-      border-radius: var(--radius-sm);
-      font-size: 0.88rem;
-      margin-bottom: 0.4rem;
-      border: 1px solid var(--gray-200);
-    }
-    .waiver-arrow { color: var(--gold-dark); font-weight: 700; }
-    .tab-bar {
+.tab-bar {
       display: flex;
       gap: 0.25rem;
       margin-bottom: 1.5rem;
@@ -101,7 +79,7 @@
     <div class="password-gate">
       <div class="lock-icon">🔐</div>
       <h2 style="margin-bottom:0.5rem;">Admin Panel</h2>
-      <p class="text-muted mb-3">Enter the admin password to update tournament results and manage waivers.</p>
+      <p class="text-muted mb-3">Enter the admin password to update tournament results.</p>
       <div class="form-group">
         <label for="pwInput">Password</label>
         <input type="password" id="pwInput" placeholder="Enter password…" autocomplete="current-password">
@@ -118,7 +96,7 @@
   <div style="background:linear-gradient(135deg,var(--green-dark),var(--green-mid));color:white;padding:1.5rem 1rem;">
     <div class="container">
       <h1 style="font-size:1.6rem;">⚙️ Admin Panel</h1>
-      <p style="opacity:0.8;font-size:0.9rem;margin-top:0.25rem;">Update tournament results and manage waiver moves.</p>
+      <p style="opacity:0.8;font-size:0.9rem;margin-top:0.25rem;">Update tournament results.</p>
     </div>
   </div>
 
@@ -130,7 +108,6 @@
       <!-- Tabs -->
       <div class="tab-bar">
         <button class="tab-btn active" onclick="showTab('results')">📋 Round Results</button>
-        <button class="tab-btn" onclick="showTab('waivers')">🔄 Waiver Wire</button>
       </div>
 
       <!-- ── Results Tab ─────────────────────────────────────── -->
@@ -144,45 +121,6 @@
 
       </div>
 
-      <!-- ── Waivers Tab ─────────────────────────────────────── -->
-      <div id="tab-waivers" class="tab-panel">
-
-        <div class="card mb-3">
-          <h3 style="margin-bottom:1rem;color:var(--green-dark);">Add Waiver Move</h3>
-          <p class="text-muted text-sm mb-2">After the group stage, record each player's waiver move here.</p>
-          <div class="waiver-form">
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Player Name</label>
-              <input type="text" id="wPlayerName" placeholder="Player name" list="playersList">
-              <datalist id="playersList"></datalist>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Drop Team</label>
-              <select id="wDropTeam">
-                <option value="">— Select team to drop —</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label>Pick Up Team (≤10 pts)</label>
-              <select id="wPickTeam">
-                <option value="">— Select team to pick —</option>
-              </select>
-            </div>
-            <button class="btn btn-green" onclick="submitWaiver()">Add Waiver</button>
-          </div>
-          <div id="waiverAlert" class="mt-1"></div>
-        </div>
-
-        <!-- Existing waivers -->
-        <div class="card">
-          <div class="card-header">
-            <h3>Recorded Waivers</h3>
-            <button class="btn btn-outline btn-sm" onclick="loadWaivers()">↻ Refresh</button>
-          </div>
-          <div id="waiverList"><div class="loading-state"><div class="spinner"></div></div></div>
-        </div>
-
-      </div>
 
     </section>
   </main>
@@ -226,9 +164,6 @@ function checkPassword() {
 async function init() {
   await loadCurrentResults();
   renderRounds();
-  await populateTeamDropdowns();
-  await loadWaivers();
-  await loadPlayerNames();
 }
 
 // ── Load existing results ─────────────────────────────────────
@@ -384,94 +319,6 @@ function showTab(tabName) {
   event.currentTarget.classList.add('active');
 }
 
-// ── Waiver Wire ───────────────────────────────────────────────
-async function populateTeamDropdowns() {
-  const dropSel = document.getElementById('wDropTeam');
-  const pickSel = document.getElementById('wPickTeam');
-  if (!dropSel || !pickSel) return;
-
-  TEAMS.forEach(team => {
-    const opt1 = new Option(`${team.flag} ${team.name} (${team.price}pts)`, team.id);
-    dropSel.appendChild(opt1);
-
-    if (team.price <= WAIVER_BUDGET) {
-      const opt2 = new Option(`${team.flag} ${team.name} (${team.price}pts${isUnderdog(team)?' 🐆':''})`, team.id);
-      pickSel.appendChild(opt2);
-    }
-  });
-}
-
-async function loadPlayerNames() {
-  if (!db) return;
-  const { data } = await db.from('picks').select('player_name');
-  const dl = document.getElementById('playersList');
-  if (!dl || !data) return;
-  const names = [...new Set(data.map(r => r.player_name))];
-  names.forEach(name => {
-    const opt = document.createElement('option');
-    opt.value = name;
-    dl.appendChild(opt);
-  });
-}
-
-async function submitWaiver() {
-  const playerName = document.getElementById('wPlayerName')?.value.trim();
-  const dropTeam   = document.getElementById('wDropTeam')?.value;
-  const pickTeam   = document.getElementById('wPickTeam')?.value;
-
-  if (!playerName) { showAlert('waiverAlert', 'Please enter player name.', 'error'); return; }
-  if (!dropTeam)   { showAlert('waiverAlert', 'Please select team to drop.', 'error'); return; }
-  if (!pickTeam)   { showAlert('waiverAlert', 'Please select team to pick up.', 'error'); return; }
-  if (dropTeam === pickTeam) { showAlert('waiverAlert', 'Cannot drop and pick the same team.', 'error'); return; }
-
-  if (!db) return;
-
-  const { error } = await db.from('waivers').insert({
-    player_name: playerName,
-    dropped_team_id: dropTeam,
-    picked_team_id: pickTeam,
-  });
-
-  if (error) {
-    showAlert('waiverAlert', `Error: ${error.message}`, 'error');
-    return;
-  }
-
-  showAlert('waiverAlert', `✅ Waiver recorded for <strong>${playerName}</strong>.`, 'success');
-  document.getElementById('wPlayerName').value = '';
-  document.getElementById('wDropTeam').value = '';
-  document.getElementById('wPickTeam').value = '';
-  await loadWaivers();
-}
-
-async function loadWaivers() {
-  if (!db) return;
-  const listEl = document.getElementById('waiverList');
-  if (!listEl) return;
-
-  const { data, error } = await db.from('waivers').select('*').order('created_at', { ascending: false });
-
-  if (error) { listEl.innerHTML = `<p class="text-muted">Error loading waivers: ${error.message}</p>`; return; }
-  if (!data || data.length === 0) { listEl.innerHTML = '<p class="text-muted text-sm">No waivers recorded yet.</p>'; return; }
-
-  listEl.innerHTML = '';
-  data.forEach(w => {
-    const dropTeam = getTeamById(w.dropped_team_id);
-    const pickTeam = getTeamById(w.picked_team_id);
-    const item = document.createElement('div');
-    item.className = 'waiver-item';
-    item.innerHTML = `
-      <strong>${escHtml(w.player_name)}</strong>
-      <span>dropped</span>
-      <span>${dropTeam ? dropTeam.flag + ' ' + dropTeam.name : w.dropped_team_id}</span>
-      <span class="waiver-arrow">→</span>
-      <span>picked up</span>
-      <span>${pickTeam ? pickTeam.flag + ' ' + pickTeam.name : w.picked_team_id}</span>
-      <span class="text-muted text-sm" style="margin-left:auto;">${new Date(w.created_at).toLocaleString()}</span>
-    `;
-    listEl.appendChild(item);
-  });
-}
 
 function escHtml(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');

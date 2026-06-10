@@ -172,7 +172,6 @@
 let db = null;
 let allPlayers = [];
 let allResults = [];
-let allWaivers = [];
 let sortField = 'score';
 let sortDir = -1; // -1 = desc, 1 = asc
 let expandedPlayers = new Set();
@@ -192,18 +191,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ── Load data from Supabase ───────────────────────────────────
 async function loadLeaderboard() {
   try {
-    const [picksRes, resultsRes, waiversRes] = await Promise.all([
+    const [picksRes, resultsRes] = await Promise.all([
       db.from('picks').select('*').order('submitted_at', { ascending: false }),
       db.from('results').select('*').eq('advanced', true),
-      db.from('waivers').select('*'),
     ]);
 
     if (picksRes.error) throw picksRes.error;
     if (resultsRes.error) throw resultsRes.error;
-    if (waiversRes.error) throw waiversRes.error;
 
     allResults = resultsRes.data || [];
-    allWaivers = waiversRes.data || [];
 
     // Deduplicate picks: keep most recent submission per player
     const seen = new Map();
@@ -215,7 +211,7 @@ async function loadLeaderboard() {
     // Calculate scores
     allPlayers = uniquePicks.map(pick => {
       const { totalScore, breakdown, activeTeamIds } = calculateScore(
-        pick.player_name, pick.team_ids, allResults, allWaivers
+        pick.player_name, pick.team_ids, allResults
       );
       return { ...pick, totalScore, breakdown, activeTeamIds };
     });
