@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pick Your Teams — World Cup Portfolio Game 2026</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── Site Header ─────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="site-logo">
+      <span class="trophy">🏆</span>
+      World Cup Portfolio Game
+      <span class="year">2026</span>
+    </a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="pick.html" class="active btn-nav">Pick Teams</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ── Budget Tracker (sticky) ─────────────────────────────── -->
+<div class="budget-bar" id="budgetBar">
+  <div class="budget-inner">
+    <div class="budget-left">
+      <div class="budget-stat">
+        <span class="val" id="budgetRemaining">100</span>
+        <span class="lbl">pts remaining</span>
+      </div>
+      <div class="budget-stat">
+        <span class="val" id="budgetSpent">0</span>
+        <span class="lbl">pts spent</span>
+      </div>
+      <div class="budget-stat">
+        <span class="val" id="teamCount">0</span>
+        <span class="lbl">teams selected</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="budgetFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" id="submitBtn" onclick="submitPicks()" disabled>Submit Picks</button>
+  </div>
+</div>
+
+<!-- ── Main ─────────────────────────────────────────────────── -->
+<main class="container">
+  <section class="section" style="padding-top:1.5rem;">
+
+    <!-- Player Name -->
+    <div class="card mb-3" style="max-width:480px;">
+      <h2 style="margin-bottom:1rem; font-size:1.3rem;">👤 Your Name</h2>
+      <div class="form-group" style="margin-bottom:0.5rem;">
+        <label for="playerName">Enter your name to save your picks</label>
+        <input type="text" id="playerName" placeholder="e.g. Alex" maxlength="40" autocomplete="off">
+      </div>
+      <div id="nameAlert"></div>
+    </div>
+
+    <!-- Page title + instructions -->
+    <div class="flex-between mb-2" style="flex-wrap:wrap; gap:0.5rem;">
+      <div>
+        <h2 class="section-title" style="margin-bottom:0.1rem;">⚽ Pick Your Teams</h2>
+        <p class="text-muted text-sm">Select teams within your 100-point budget. <span style="color:var(--gold-dark);font-weight:600;">🐆 Underdogs (≤5 pts) earn 2× points!</span></p>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="clearPicks()">✕ Clear All</button>
+    </div>
+
+    <div id="alertBox"></div>
+
+    <!-- Teams by Tier -->
+    <div id="teamsContainer"></div>
+
+    <!-- Submit Section -->
+    <div class="card text-center mt-3" id="submitSection">
+      <h3 style="margin-bottom:0.5rem; color:var(--green-dark);">Ready to submit?</h3>
+      <p class="text-muted text-sm mb-2">Make sure your name is entered above. You can resubmit to update your picks before the tournament starts.</p>
+      <button class="btn btn-primary btn-lg" onclick="submitPicks()" id="submitBtn2">⚽ Submit My Picks</button>
+      <div id="submitAlert" class="mt-2"></div>
+    </div>
+
+  </section>
+</main>
+
+<!-- ── Footer ───────────────────────────────────────────────── -->
+<footer>
+  <p>🏆 World Cup Portfolio Game · 2026 FIFA World Cup · Jun 11 – Jul 19, 2026</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="app.js"></script>
+<script>
+// ── State ─────────────────────────────────────────────────────
+let selectedTeams = new Set();
+let db = null;
+
+// ── Init ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  db = createSupabaseClient();
+  renderTeams();
+  updateBudget();
+
+  // Restore from localStorage if available
+  const saved = localStorage.getItem('wcpg_selected');
+  const savedName = localStorage.getItem('wcpg_name');
+  if (saved) {
+    try {
+      const arr = JSON.parse(saved);
+      arr.forEach(id => selectedTeams.add(id));
+    } catch (e) {}
+  }
+  if (savedName) {
+    document.getElementById('playerName').value = savedName;
+  }
+  renderTeams();
+  updateBudget();
+});
+
+// ── Render Teams by Tier ──────────────────────────────────────
+function renderTeams() {
+  const container = document.getElementById('teamsContainer');
+  const tiers = groupByTier(TEAMS);
+  container.innerHTML = '';
+
+  tiers.forEach(tier => {
+    const section = document.createElement('div');
+    section.className = 'tier-section';
+
+    const priceRange = tier.teams.length > 0
+      ? `${Math.min(...tier.teams.map(t=>t.price))}–${Math.max(...tier.teams.map(t=>t.price))} pts each`
+      : '';
+
+    section.innerHTML = `
+      <div class="tier-header">
+        <span>${tier.label}</span>
+        <span class="tier-pts">${priceRange}</span>
+      </div>
+      <div class="teams-grid" id="tier-${tier.label.replace(/\W+/g,'_')}"></div>
+    `;
+    container.appendChild(section);
+
+    const grid = section.querySelector('.teams-grid');
+    tier.teams.forEach(team => {
+      grid.appendChild(createTeamCard(team));
+    });
+  });
+}
+
+function createTeamCard(team) {
+  const card = document.createElement('div');
+  const underdog = isUnderdog(team);
+  const selected = selectedTeams.has(team.id);
+  const spent = getSpent();
+  const wouldExceed = !selected && (spent + team.price > BUDGET);
+
+  card.className = `team-card${underdog ? ' underdog' : ''}${selected ? ' selected' : ''}${wouldExceed ? ' disabled' : ''}`;
+  card.dataset.id = team.id;
+  card.innerHTML = `
+    <div class="team-flag">${team.flag}</div>
+    <div class="team-name">${team.name}</div>
+    <div class="team-price">
+      ${team.price} <span class="pts-label">pts</span>
+    </div>
+    ${underdog ? '<div><span class="underdog-badge">2× pts!</span></div>' : ''}
+    <div class="text-sm text-muted" style="font-size:0.7rem;margin-top:2px;">Group ${team.group}</div>
+  `;
+  card.addEventListener('click', () => toggleTeam(team));
+  return card;
+}
+
+// ── Toggle Team Selection ─────────────────────────────────────
+function toggleTeam(team) {
+  if (selectedTeams.has(team.id)) {
+    selectedTeams.delete(team.id);
+  } else {
+    const spent = getSpent();
+    if (spent + team.price > BUDGET) {
+      showAlert('alertBox', `Not enough budget! You need ${team.price} pts but only have ${BUDGET - spent} remaining.`, 'warning');
+      setTimeout(() => { const el = document.getElementById('alertBox'); if(el) el.innerHTML=''; }, 3000);
+      return;
+    }
+    selectedTeams.add(team.id);
+    document.getElementById('alertBox').innerHTML = '';
+  }
+
+  // Save to localStorage
+  localStorage.setItem('wcpg_selected', JSON.stringify([...selectedTeams]));
+
+  // Re-render all cards to update disabled states
+  renderTeams();
+  updateBudget();
+}
+
+// ── Budget Calculation ────────────────────────────────────────
+function getSpent() {
+  let total = 0;
+  selectedTeams.forEach(id => {
+    const t = getTeamById(id);
+    if (t) total += t.price;
+  });
+  return total;
+}
+
+function updateBudget() {
+  const spent = getSpent();
+  const remaining = BUDGET - spent;
+  const pct = (spent / BUDGET) * 100;
+
+  const remEl = document.getElementById('budgetRemaining');
+  const spentEl = document.getElementById('budgetSpent');
+  const countEl = document.getElementById('teamCount');
+  const fill = document.getElementById('budgetFill');
+  const btn1 = document.getElementById('submitBtn');
+  const btn2 = document.getElementById('submitBtn2');
+
+  if (remEl) remEl.textContent = remaining;
+  if (spentEl) spentEl.textContent = spent;
+  if (countEl) countEl.textContent = selectedTeams.size;
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.className = 'progress-bar-fill' + (pct > 90 ? ' danger' : '');
+  }
+  if (remEl) remEl.className = 'val' + (remaining < 5 ? ' warning' : '');
+
+  const hasName = document.getElementById('playerName')?.value.trim().length > 0;
+  const canSubmit = selectedTeams.size > 0 && hasName;
+  if (btn1) btn1.disabled = !canSubmit;
+  if (btn2) btn2.disabled = !canSubmit;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('playerName')?.addEventListener('input', () => {
+    localStorage.setItem('wcpg_name', document.getElementById('playerName').value);
+    updateBudget();
+  });
+});
+
+// ── Clear All ─────────────────────────────────────────────────
+function clearPicks() {
+  if (selectedTeams.size === 0) return;
+  if (!confirm('Clear all selected teams?')) return;
+  selectedTeams.clear();
+  localStorage.removeItem('wcpg_selected');
+  renderTeams();
+  updateBudget();
+}
+
+// ── Submit Picks to Supabase ──────────────────────────────────
+async function submitPicks() {
+  const nameEl = document.getElementById('playerName');
+  const name = nameEl?.value.trim();
+
+  if (!name) {
+    showAlert('nameAlert', 'Please enter your name before submitting.', 'error');
+    nameEl?.focus();
+    return;
+  }
+
+  if (selectedTeams.size === 0) {
+    showAlert('submitAlert', 'Please select at least one team.', 'error');
+    return;
+  }
+
+  if (!db) {
+    showAlert('submitAlert', '⚠️ Database not configured. See SETUP.md to connect Supabase.', 'warning');
+    return;
+  }
+
+  const btn1 = document.getElementById('submitBtn');
+  const btn2 = document.getElementById('submitBtn2');
+  if (btn1) { btn1.disabled = true; btn1.textContent = 'Saving…'; }
+  if (btn2) { btn2.disabled = true; btn2.textContent = 'Saving…'; }
+
+  try {
+    const { error } = await db
+      .from('picks')
+      .insert({
+        player_name: name,
+        team_ids: [...selectedTeams],
+      });
+
+    if (error) throw error;
+
+    showAlert('submitAlert',
+      `🎉 Picks submitted for <strong>${name}</strong>! ${selectedTeams.size} teams selected. Good luck!`,
+      'success'
+    );
+
+    localStorage.removeItem('wcpg_selected');
+
+    // Link to leaderboard
+    setTimeout(() => {
+      document.getElementById('submitAlert').innerHTML +=
+        '<br><a href="leaderboard.html" class="btn btn-green btn-sm mt-2">📊 View Leaderboard →</a>';
+    }, 500);
+
+  } catch (err) {
+    console.error(err);
+    showAlert('submitAlert', `Error saving picks: ${err.message || err}`, 'error');
+  } finally {
+    if (btn1) { btn1.disabled = false; btn1.textContent = 'Submit Picks'; }
+    if (btn2) { btn2.disabled = false; btn2.textContent = '⚽ Submit My Picks'; }
+  }
+}
+</script>
+</body>
+</html>
