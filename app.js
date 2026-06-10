@@ -5,8 +5,8 @@
 // URL and anon key (see SETUP.md for instructions).
 // =============================================================
 
-const SUPABASE_URL = https://itadojsyosjpidijumbx.supabase.co;
-const SUPABASE_ANON_KEY = sb_publishable_qcOw0eQzALp2qwwUtb7jFg_1k4gsU9X;
+const SUPABASE_URL = 'https://itadojsyosjpidijumbx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0YWRvanN5b3NqcGlkaWp1bWJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNDg0ODYsImV4cCI6MjA5NjYyNDQ4Nn0.pcSBsbu2j4PIsYWBMYx9jTCoDvNgPYJN1hVZFWrDX6Q';
 
 // ── Game Constants ────────────────────────────────────────────
 const BUDGET = 100;
