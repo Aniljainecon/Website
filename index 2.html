@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Cup Portfolio Game — 2026</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── Site Header ─────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="site-logo">
+      <span class="trophy">🏆</span>
+      World Cup Portfolio Game
+      <span class="year">2026</span>
+    </a>
+    <nav>
+      <a href="index.html" class="active">Home</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="pick.html" class="btn-nav">Pick Teams →</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ── Hero ────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-badge">⚽ 2026 FIFA World Cup · Jun 11 – Jul 19</div>
+  <h1>Build Your World Cup Portfolio</h1>
+  <p class="subtitle">
+    Draft a portfolio of national teams within your budget.
+    Earn points as your teams advance — biggest score wins!
+  </p>
+  <div class="hero-actions">
+    <a href="pick.html" class="btn btn-primary btn-lg">⚽ Pick My Teams</a>
+    <a href="leaderboard.html" class="btn btn-secondary btn-lg">📊 View Leaderboard</a>
+  </div>
+</section>
+
+<!-- ── Main Content ─────────────────────────────────────────── -->
+<main class="container">
+
+  <!-- How It Works -->
+  <section class="section">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-subtitle">Simple rules, tons of drama — every match matters.</p>
+
+    <div class="info-grid">
+      <div class="info-box">
+        <h3>💰 100-Point Budget</h3>
+        <p>Each player starts with 100 points to spend. Spend wisely — you can't go over budget.</p>
+      </div>
+      <div class="info-box">
+        <h3>🌍 Pick Any Teams</h3>
+        <p>Choose as many teams as your budget allows across all 48 qualified nations.</p>
+      </div>
+      <div class="info-box gold-accent">
+        <h3>🐆 Underdog Bonus (2×)</h3>
+        <p>Teams priced at <strong>5 points or less</strong> earn <strong>double points</strong> for every round they advance!</p>
+      </div>
+      <div class="info-box">
+        <h3>🔄 Waiver Wire</h3>
+        <p>After the group stage, each player may drop one team and pick up an unclaimed one (10-point reserve budget).</p>
+      </div>
+    </div>
+
+    <div class="card" style="max-width:680px;">
+      <h3 style="margin-bottom:0.75rem; color:var(--green-dark);">Example Portfolio</h3>
+      <p style="font-size:0.9rem;color:var(--gray-600);margin-bottom:0.75rem;">
+        You could spend your 100 points on something like:
+      </p>
+      <div class="team-chips" style="margin-bottom:0.75rem;">
+        <span class="team-chip advanced">🇫🇷 France · 20 pts</span>
+        <span class="team-chip">🇲🇦 Morocco · 13 pts</span>
+        <span class="team-chip">🇯🇵 Japan · 11 pts</span>
+        <span class="team-chip">🇳🇴 Norway · 6 pts</span>
+        <span class="team-chip underdog">🇸🇳 Senegal · 9 pts</span>
+        <span class="team-chip underdog">🇪🇨 Ecuador · 7 pts</span>
+        <span class="team-chip underdog">🇿🇦 South Africa · 3 pts <span class="underdog-badge" style="display:inline">2×</span></span>
+      </div>
+      <p style="font-size:0.85rem;color:var(--gray-600);">Total: 69 pts spent · 31 pts remaining for more picks!</p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Scoring Table -->
+  <section class="section">
+    <h2 class="section-title">📋 Scoring System</h2>
+    <p class="section-subtitle">
+      Points are awarded each round as teams advance. The <strong style="color:var(--gold-dark)">2× underdog multiplier</strong> applies to all rounds for teams priced ≤ 5 pts.
+    </p>
+
+    <div class="table-wrap card" style="padding:0;">
+      <table class="score-table">
+        <thead>
+          <tr>
+            <th>Round</th>
+            <th>Award</th>
+            <th>Underdog (price ≤ 5) 🐆</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Group Stage</strong></td>
+            <td class="pts-cell">+5 pts</td>
+            <td class="pts-cell pts-2x">+10 pts</td>
+            <td class="text-muted text-sm">Top 2 per group + 8 best 3rd-place advance to R32</td>
+          </tr>
+          <tr>
+            <td><strong>Round of 32</strong></td>
+            <td class="pts-cell">+5 pts</td>
+            <td class="pts-cell pts-2x">+10 pts</td>
+            <td class="text-muted text-sm">NEW in 2026! 32 teams enter, 16 advance</td>
+          </tr>
+          <tr>
+            <td><strong>Round of 16</strong></td>
+            <td class="pts-cell">+5 pts</td>
+            <td class="pts-cell pts-2x">+10 pts</td>
+            <td class="text-muted text-sm">16 teams → 8 advance</td>
+          </tr>
+          <tr>
+            <td><strong>Quarterfinal</strong></td>
+            <td class="pts-cell">+10 pts</td>
+            <td class="pts-cell pts-2x">+20 pts</td>
+            <td class="text-muted text-sm">8 teams → 4 advance</td>
+          </tr>
+          <tr>
+            <td><strong>Semifinal</strong></td>
+            <td class="pts-cell">+15 pts</td>
+            <td class="pts-cell pts-2x">+30 pts</td>
+            <td class="text-muted text-sm">4 teams → 2 advance</td>
+          </tr>
+          <tr>
+            <td><strong>Final (Win)</strong></td>
+            <td class="pts-cell">+25 pts</td>
+            <td class="pts-cell pts-2x">+50 pts</td>
+            <td class="text-muted text-sm">The championship match</td>
+          </tr>
+          <tr>
+            <td><strong>Champion Bonus</strong></td>
+            <td class="pts-cell">+20 pts</td>
+            <td class="pts-cell pts-2x">+40 pts</td>
+            <td class="text-muted text-sm">Additional bonus for the World Cup winner</td>
+          </tr>
+          <tr style="background:var(--gold-muted)">
+            <td><strong>Max per team</strong></td>
+            <td class="pts-cell fw-black text-xl">85 pts</td>
+            <td class="pts-cell pts-2x fw-black text-xl">170 pts</td>
+            <td class="text-sm" style="color:var(--gold-dark)">If an underdog wins it all!</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Team Pricing Overview -->
+  <section class="section">
+    <h2 class="section-title">💰 Team Pricing Tiers</h2>
+    <p class="section-subtitle">Stronger teams cost more. Mix and match to maximize value.</p>
+
+    <div class="info-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+      <div class="info-box" style="border-left-color:var(--red)">
+        <h3>⭐ Tier 1 · 15–20 pts</h3>
+        <p>France, Spain, Argentina, Brazil, England, Portugal, Germany</p>
+      </div>
+      <div class="info-box" style="border-left-color:var(--blue)">
+        <h3>🔵 Tier 2 · 10–14 pts</h3>
+        <p>Netherlands, Morocco, Belgium, Croatia, Colombia, Uruguay, Japan, USA</p>
+      </div>
+      <div class="info-box" style="border-left-color:var(--gold)">
+        <h3>🟡 Tier 3 · 6–9 pts</h3>
+        <p>Mexico, Senegal, Switzerland, South Korea, Türkiye, Ecuador, Austria, Australia, Canada, Norway</p>
+      </div>
+      <div class="info-box gold-accent" style="border-left-color:var(--green-bright)">
+        <h3>🟢 Tier 4 · 2–5 pts · <span style="color:var(--gold-dark)">2× bonus!</span></h3>
+        <p>All remaining 23 nations — underdogs earn double points for every advance!</p>
+      </div>
+    </div>
+
+    <div class="text-center mt-3">
+      <a href="pick.html" class="btn btn-primary btn-lg">⚽ Start Picking Your Teams →</a>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Waiver Wire Rules -->
+  <section class="section">
+    <h2 class="section-title">🔄 Waiver Wire</h2>
+    <div class="card" style="max-width:680px;">
+      <ul style="padding-left:1.2rem; font-size:0.95rem; line-height:2;">
+        <li>After the <strong>group stage</strong> concludes, there is a one-time waiver window.</li>
+        <li>Each player may <strong>drop one team</strong> from their portfolio.</li>
+        <li>They can then <strong>pick up any unclaimed team</strong> that no other player owns.</li>
+        <li>Waiver picks have a <strong>10-point reserve budget</strong> — you can only pick up a team priced ≤ 10 pts.</li>
+        <li>Waivers are submitted to the commissioner, who enters them in the admin panel.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── Footer ───────────────────────────────────────────────── -->
+<footer>
+  <p>🏆 World Cup Portfolio Game · 2026 FIFA World Cup · Jun 11 – Jul 19, 2026</p>
+  <p style="margin-top:0.25rem">
+    <a href="pick.html">Pick Teams</a> ·
+    <a href="leaderboard.html">Leaderboard</a> ·
+    <a href="admin.html">Admin</a>
+  </p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

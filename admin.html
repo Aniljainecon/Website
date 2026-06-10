@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — World Cup Portfolio Game 2026</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-wrap { max-width: 900px; margin: 0 auto; }
+    .round-count-badge {
+      font-size: 0.8rem;
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 500;
+    }
+    .save-row {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--gray-200);
+      margin-top: 0.75rem;
+    }
+    .waiver-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 0.75rem;
+      align-items: end;
+    }
+    @media(max-width:640px) {
+      .waiver-form { grid-template-columns: 1fr 1fr; }
+    }
+    .waiver-list { margin-top: 1.25rem; }
+    .waiver-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--off-white);
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      margin-bottom: 0.4rem;
+      border: 1px solid var(--gray-200);
+    }
+    .waiver-arrow { color: var(--gold-dark); font-weight: 700; }
+    .tab-bar {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.5rem;
+      background: var(--gray-200);
+      border-radius: var(--radius);
+      padding: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      text-align: center;
+      padding: 0.5rem 1rem;
+      border-radius: calc(var(--radius) - 2px);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      border: none;
+      background: none;
+      transition: all var(--transition);
+      color: var(--gray-600);
+    }
+    .tab-btn.active { background: var(--white); color: var(--green-dark); box-shadow: var(--shadow); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .select-all-bar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Site Header ─────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="site-logo">
+      <span class="trophy">🏆</span>
+      World Cup Portfolio Game
+      <span class="year">2026</span>
+    </a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="pick.html" class="btn-nav">Pick Teams →</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ── Password Gate ─────────────────────────────────────────── -->
+<div id="passwordGate">
+  <main class="container">
+    <div class="password-gate">
+      <div class="lock-icon">🔐</div>
+      <h2 style="margin-bottom:0.5rem;">Admin Panel</h2>
+      <p class="text-muted mb-3">Enter the admin password to update tournament results and manage waivers.</p>
+      <div class="form-group">
+        <label for="pwInput">Password</label>
+        <input type="password" id="pwInput" placeholder="Enter password…" autocomplete="current-password">
+      </div>
+      <div id="pwAlert"></div>
+      <button class="btn btn-primary btn-full" onclick="checkPassword()">Unlock Admin →</button>
+    </div>
+  </main>
+</div>
+
+<!-- ── Admin Panel (hidden until unlocked) ──────────────────── -->
+<div id="adminPanel" class="hidden">
+
+  <div style="background:linear-gradient(135deg,var(--green-dark),var(--green-mid));color:white;padding:1.5rem 1rem;">
+    <div class="container">
+      <h1 style="font-size:1.6rem;">⚙️ Admin Panel</h1>
+      <p style="opacity:0.8;font-size:0.9rem;margin-top:0.25rem;">Update tournament results and manage waiver moves.</p>
+    </div>
+  </div>
+
+  <main class="container">
+    <section class="section admin-wrap" style="padding-top:1.5rem;">
+
+      <div id="adminAlert"></div>
+
+      <!-- Tabs -->
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="showTab('results')">📋 Round Results</button>
+        <button class="tab-btn" onclick="showTab('waivers')">🔄 Waiver Wire</button>
+      </div>
+
+      <!-- ── Results Tab ─────────────────────────────────────── -->
+      <div id="tab-results" class="tab-panel active">
+
+        <div class="alert alert-info mb-2">
+          <strong>How to use:</strong> After each round, check the teams that advanced/won. Click <strong>Save Round</strong> to update the database. Already-saved selections are pre-loaded.
+        </div>
+
+        <div id="roundsContainer"></div>
+
+      </div>
+
+      <!-- ── Waivers Tab ─────────────────────────────────────── -->
+      <div id="tab-waivers" class="tab-panel">
+
+        <div class="card mb-3">
+          <h3 style="margin-bottom:1rem;color:var(--green-dark);">Add Waiver Move</h3>
+          <p class="text-muted text-sm mb-2">After the group stage, record each player's waiver move here.</p>
+          <div class="waiver-form">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Player Name</label>
+              <input type="text" id="wPlayerName" placeholder="Player name" list="playersList">
+              <datalist id="playersList"></datalist>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Drop Team</label>
+              <select id="wDropTeam">
+                <option value="">— Select team to drop —</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Pick Up Team (≤10 pts)</label>
+              <select id="wPickTeam">
+                <option value="">— Select team to pick —</option>
+              </select>
+            </div>
+            <button class="btn btn-green" onclick="submitWaiver()">Add Waiver</button>
+          </div>
+          <div id="waiverAlert" class="mt-1"></div>
+        </div>
+
+        <!-- Existing waivers -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Recorded Waivers</h3>
+            <button class="btn btn-outline btn-sm" onclick="loadWaivers()">↻ Refresh</button>
+          </div>
+          <div id="waiverList"><div class="loading-state"><div class="spinner"></div></div></div>
+        </div>
+
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<footer>
+  <p>🏆 World Cup Portfolio Game Admin · 2026 FIFA World Cup</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="app.js"></script>
+<script>
+let db = null;
+let currentResults = {}; // round → Set of team_ids
+
+// ── Password ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const pwEl = document.getElementById('pwInput');
+  if (pwEl) {
+    pwEl.addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+  }
+});
+
+function checkPassword() {
+  const pw = document.getElementById('pwInput')?.value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('passwordGate').classList.add('hidden');
+    document.getElementById('adminPanel').classList.remove('hidden');
+    db = createSupabaseClient();
+    if (!db) {
+      showAlert('adminAlert', '⚠️ Supabase not configured. See SETUP.md.', 'warning');
+    } else {
+      init();
+    }
+  } else {
+    showAlert('pwAlert', 'Incorrect password. Try again.', 'error');
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+async function init() {
+  await loadCurrentResults();
+  renderRounds();
+  await populateTeamDropdowns();
+  await loadWaivers();
+  await loadPlayerNames();
+}
+
+// ── Load existing results ─────────────────────────────────────
+async function loadCurrentResults() {
+  if (!db) return;
+  const { data, error } = await db.from('results').select('*');
+  if (error) { console.error(error); return; }
+  currentResults = {};
+  for (const row of (data || [])) {
+    if (!currentResults[row.round]) currentResults[row.round] = new Set();
+    if (row.advanced) currentResults[row.round].add(row.team_id);
+  }
+}
+
+// ── Render Round Sections ─────────────────────────────────────
+function renderRounds() {
+  const container = document.getElementById('roundsContainer');
+  container.innerHTML = '';
+
+  // Max teams per round
+  const maxTeams = { group: 32, r32: 16, r16: 8, qf: 4, sf: 2, final: 1, champion: 1 };
+
+  ROUNDS.forEach(round => {
+    const max = maxTeams[round.id] || 48;
+    const existing = currentResults[round.id] || new Set();
+    const count = existing.size;
+
+    const section = document.createElement('div');
+    section.className = 'round-section';
+    section.id = `round-${round.id}`;
+
+    section.innerHTML = `
+      <div class="round-section-header">
+        <h3>${round.label}</h3>
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span class="round-count-badge"><span id="count-${round.id}">${count}</span> / ${max} teams</span>
+          <span style="opacity:0.75;font-size:0.82rem;">+${round.points} pts ${round.points <= 5 ? '(+'+round.points*2+' underdog)' : '(+'+round.points*2+' underdog)'}</span>
+        </div>
+      </div>
+      <div class="round-section-body">
+        <div class="select-all-bar">
+          <button class="btn btn-outline btn-sm" onclick="selectNone('${round.id}')">Clear All</button>
+        </div>
+        <div class="teams-checklist" id="checklist-${round.id}"></div>
+        <div class="save-row">
+          <span class="text-muted text-sm" id="savedMsg-${round.id}"></span>
+          <button class="btn btn-green" onclick="saveRound('${round.id}')">💾 Save ${round.label}</button>
+        </div>
+        <div id="roundAlert-${round.id}"></div>
+      </div>
+    `;
+
+    container.appendChild(section);
+
+    // Populate checkboxes
+    const checklist = section.querySelector(`#checklist-${round.id}`);
+    TEAMS.forEach(team => {
+      const checked = existing.has(team.id);
+      const item = document.createElement('label');
+      item.className = `check-item${checked ? ' checked' : ''}`;
+      item.innerHTML = `
+        <input type="checkbox" id="chk-${round.id}-${team.id}" value="${team.id}"
+               ${checked ? 'checked' : ''}
+               onchange="onCheckChange('${round.id}', '${team.id}', this)">
+        <span>${team.flag} ${team.name}</span>
+        <span style="margin-left:auto;font-size:0.75rem;color:var(--gray-600);">${team.price}pts</span>
+      `;
+      checklist.appendChild(item);
+    });
+  });
+}
+
+function onCheckChange(roundId, teamId, checkbox) {
+  const label = checkbox.closest('.check-item');
+  if (checkbox.checked) {
+    if (!currentResults[roundId]) currentResults[roundId] = new Set();
+    currentResults[roundId].add(teamId);
+    label.classList.add('checked');
+  } else {
+    if (currentResults[roundId]) currentResults[roundId].delete(teamId);
+    label.classList.remove('checked');
+  }
+  // Update count badge
+  const count = (currentResults[roundId] || new Set()).size;
+  const countEl = document.getElementById(`count-${roundId}`);
+  if (countEl) countEl.textContent = count;
+}
+
+function selectNone(roundId) {
+  currentResults[roundId] = new Set();
+  // Uncheck all boxes for this round
+  document.querySelectorAll(`#checklist-${roundId} input[type="checkbox"]`).forEach(cb => {
+    cb.checked = false;
+    cb.closest('.check-item')?.classList.remove('checked');
+  });
+  const countEl = document.getElementById(`count-${roundId}`);
+  if (countEl) countEl.textContent = 0;
+}
+
+// ── Save Round to Supabase ────────────────────────────────────
+async function saveRound(roundId) {
+  if (!db) return;
+
+  const selectedIds = [...(currentResults[roundId] || new Set())];
+
+  // Build upserts: all teams, marking advanced=true/false
+  const rows = TEAMS.map(team => ({
+    round: roundId,
+    team_id: team.id,
+    advanced: selectedIds.includes(team.id),
+    updated_at: new Date().toISOString(),
+  }));
+
+  const btn = document.querySelector(`#round-${roundId} .btn-green`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  try {
+    const { error } = await db
+      .from('results')
+      .upsert(rows, { onConflict: 'round,team_id' });
+
+    if (error) throw error;
+
+    const msgEl = document.getElementById(`savedMsg-${roundId}`);
+    if (msgEl) {
+      msgEl.textContent = `✓ Saved at ${new Date().toLocaleTimeString()}`;
+      msgEl.style.color = 'var(--green-bright)';
+    }
+
+    showAlert(`roundAlert-${roundId}`,
+      `✅ Saved! ${selectedIds.length} team(s) marked as advanced in <strong>${ROUNDS.find(r=>r.id===roundId)?.label}</strong>.`,
+      'success'
+    );
+
+    setTimeout(() => {
+      const el = document.getElementById(`roundAlert-${roundId}`);
+      if (el) el.innerHTML = '';
+    }, 4000);
+
+  } catch (err) {
+    console.error(err);
+    showAlert(`roundAlert-${roundId}`, `Error: ${err.message || err}`, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = `💾 Save ${ROUNDS.find(r=>r.id===roundId)?.label}`; }
+  }
+}
+
+// ── Tabs ──────────────────────────────────────────────────────
+function showTab(tabName) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`tab-${tabName}`)?.classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ── Waiver Wire ───────────────────────────────────────────────
+async function populateTeamDropdowns() {
+  const dropSel = document.getElementById('wDropTeam');
+  const pickSel = document.getElementById('wPickTeam');
+  if (!dropSel || !pickSel) return;
+
+  TEAMS.forEach(team => {
+    const opt1 = new Option(`${team.flag} ${team.name} (${team.price}pts)`, team.id);
+    dropSel.appendChild(opt1);
+
+    if (team.price <= WAIVER_BUDGET) {
+      const opt2 = new Option(`${team.flag} ${team.name} (${team.price}pts${isUnderdog(team)?' 🐆':''})`, team.id);
+      pickSel.appendChild(opt2);
+    }
+  });
+}
+
+async function loadPlayerNames() {
+  if (!db) return;
+  const { data } = await db.from('picks').select('player_name');
+  const dl = document.getElementById('playersList');
+  if (!dl || !data) return;
+  const names = [...new Set(data.map(r => r.player_name))];
+  names.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    dl.appendChild(opt);
+  });
+}
+
+async function submitWaiver() {
+  const playerName = document.getElementById('wPlayerName')?.value.trim();
+  const dropTeam   = document.getElementById('wDropTeam')?.value;
+  const pickTeam   = document.getElementById('wPickTeam')?.value;
+
+  if (!playerName) { showAlert('waiverAlert', 'Please enter player name.', 'error'); return; }
+  if (!dropTeam)   { showAlert('waiverAlert', 'Please select team to drop.', 'error'); return; }
+  if (!pickTeam)   { showAlert('waiverAlert', 'Please select team to pick up.', 'error'); return; }
+  if (dropTeam === pickTeam) { showAlert('waiverAlert', 'Cannot drop and pick the same team.', 'error'); return; }
+
+  if (!db) return;
+
+  const { error } = await db.from('waivers').insert({
+    player_name: playerName,
+    dropped_team_id: dropTeam,
+    picked_team_id: pickTeam,
+  });
+
+  if (error) {
+    showAlert('waiverAlert', `Error: ${error.message}`, 'error');
+    return;
+  }
+
+  showAlert('waiverAlert', `✅ Waiver recorded for <strong>${playerName}</strong>.`, 'success');
+  document.getElementById('wPlayerName').value = '';
+  document.getElementById('wDropTeam').value = '';
+  document.getElementById('wPickTeam').value = '';
+  await loadWaivers();
+}
+
+async function loadWaivers() {
+  if (!db) return;
+  const listEl = document.getElementById('waiverList');
+  if (!listEl) return;
+
+  const { data, error } = await db.from('waivers').select('*').order('created_at', { ascending: false });
+
+  if (error) { listEl.innerHTML = `<p class="text-muted">Error loading waivers: ${error.message}</p>`; return; }
+  if (!data || data.length === 0) { listEl.innerHTML = '<p class="text-muted text-sm">No waivers recorded yet.</p>'; return; }
+
+  listEl.innerHTML = '';
+  data.forEach(w => {
+    const dropTeam = getTeamById(w.dropped_team_id);
+    const pickTeam = getTeamById(w.picked_team_id);
+    const item = document.createElement('div');
+    item.className = 'waiver-item';
+    item.innerHTML = `
+      <strong>${escHtml(w.player_name)}</strong>
+      <span>dropped</span>
+      <span>${dropTeam ? dropTeam.flag + ' ' + dropTeam.name : w.dropped_team_id}</span>
+      <span class="waiver-arrow">→</span>
+      <span>picked up</span>
+      <span>${pickTeam ? pickTeam.flag + ' ' + pickTeam.name : w.picked_team_id}</span>
+      <span class="text-muted text-sm" style="margin-left:auto;">${new Date(w.created_at).toLocaleString()}</span>
+    `;
+    listEl.appendChild(item);
+  });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

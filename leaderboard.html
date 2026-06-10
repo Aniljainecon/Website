@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaderboard — World Cup Portfolio Game 2026</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sort-btn { cursor: pointer; user-select: none; }
+    .sort-btn:hover { background: rgba(255,255,255,0.15); }
+    .score-big { font-size: 1.15rem; font-weight: 800; color: var(--green-mid); }
+    .no-data {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--gray-600);
+    }
+    .no-data .icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .refresh-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.7);
+    }
+    .dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .summary-bar {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--green-dark);
+      color: var(--white);
+      border-radius: var(--radius);
+      margin-bottom: 1.25rem;
+    }
+    .summary-bar .stat { font-size: 0.85rem; }
+    .summary-bar .stat strong { color: var(--gold); font-size: 1rem; }
+    .round-pill {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: var(--green-muted);
+      color: var(--green-mid);
+      margin: 1px;
+      white-space: nowrap;
+    }
+    .round-pill.champion { background: var(--gold-muted); color: var(--gold-dark); }
+    .player-name-cell { font-weight: 700; }
+    .expand-toggle {
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: var(--green-bright);
+      white-space: nowrap;
+    }
+    .teams-detail { padding: 0.75rem 1rem; background: var(--off-white); }
+    .team-detail-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--gray-200);
+      font-size: 0.88rem;
+    }
+    .team-detail-row:last-child { border-bottom: none; }
+    .team-detail-flag { font-size: 1.2rem; }
+    .team-detail-name { flex: 1; font-weight: 600; }
+    .team-detail-price { color: var(--gray-600); font-size: 0.8rem; }
+    .team-detail-pts { font-weight: 800; color: var(--green-mid); min-width: 50px; text-align: right; }
+    .team-detail-pts.gold { color: var(--gold-dark); }
+    .rounds-earned { display: flex; flex-wrap: wrap; gap: 2px; flex: 2; }
+  </style>
+</head>
+<body>
+
+<!-- ── Site Header ─────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="site-logo">
+      <span class="trophy">🏆</span>
+      World Cup Portfolio Game
+      <span class="year">2026</span>
+    </a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="leaderboard.html" class="active">Leaderboard</a>
+      <a href="pick.html" class="btn-nav">Pick Teams →</a>
+    </nav>
+    <div class="refresh-info">
+      <div class="dot"></div>
+      <span>Live · refreshes every 60s</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── Hero ────────────────────────────────────────────────── -->
+<div style="background:linear-gradient(135deg,var(--green-dark),var(--green-mid));color:white;padding:2rem 1rem;text-align:center;">
+  <h1>📊 Leaderboard</h1>
+  <p style="opacity:0.85;font-size:1rem;margin-top:0.25rem;">Live standings — scores update as teams advance</p>
+</div>
+
+<!-- ── Main ─────────────────────────────────────────────────── -->
+<main class="container">
+  <section class="section" style="padding-top:1.5rem;">
+
+    <div id="alertBox"></div>
+
+    <!-- Summary Stats -->
+    <div class="summary-bar" id="summaryBar" style="display:none;">
+      <div class="stat">👥 Players: <strong id="statPlayers">—</strong></div>
+      <div class="stat">🏅 Leader: <strong id="statLeader">—</strong></div>
+      <div class="stat">📅 Last updated: <strong id="statUpdated">—</strong></div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingState" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading leaderboard…</p>
+    </div>
+
+    <!-- No data -->
+    <div id="noDataState" class="no-data hidden">
+      <div class="icon">⚽</div>
+      <h3>No picks submitted yet!</h3>
+      <p class="text-muted">Be the first to submit your team picks.</p>
+      <a href="pick.html" class="btn btn-primary mt-2">Pick My Teams →</a>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div id="leaderboardWrap" class="hidden">
+      <div class="table-wrap card" style="padding:0; overflow:hidden;">
+        <table id="leaderboardTable">
+          <thead>
+            <tr>
+              <th style="width:44px;">Rank</th>
+              <th class="sort-btn" onclick="sortBy('name')">Player <span id="sort-name"></span></th>
+              <th class="sort-btn" onclick="sortBy('score')" style="text-align:right;">Score <span id="sort-score">▼</span></th>
+              <th style="text-align:center;">Teams</th>
+              <th style="text-align:center; min-width:80px;">Best Round</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+      </div>
+
+      <p class="text-muted text-sm text-center mt-2" id="lastRefresh"></p>
+    </div>
+
+    <!-- Round Results Legend -->
+    <div class="card mt-3" id="resultsLegend" style="display:none;">
+      <div class="card-header">
+        <h3>🏁 Current Results</h3>
+        <span class="text-muted text-sm">Which teams have advanced so far</span>
+      </div>
+      <div id="resultsGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;"></div>
+    </div>
+
+  </section>
+</main>
+
+<footer>
+  <p>🏆 World Cup Portfolio Game · 2026 FIFA World Cup · Jun 11 – Jul 19, 2026</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="app.js"></script>
+<script>
+let db = null;
+let allPlayers = [];
+let allResults = [];
+let allWaivers = [];
+let sortField = 'score';
+let sortDir = -1; // -1 = desc, 1 = asc
+let expandedPlayers = new Set();
+
+document.addEventListener('DOMContentLoaded', async () => {
+  db = createSupabaseClient();
+  if (!db) {
+    showAlert('alertBox', '⚠️ Supabase not configured. See SETUP.md to connect the database.', 'warning');
+    document.getElementById('loadingState').classList.add('hidden');
+    return;
+  }
+  await loadLeaderboard();
+  // Auto-refresh every 60 seconds
+  setInterval(loadLeaderboard, 60000);
+});
+
+// ── Load data from Supabase ───────────────────────────────────
+async function loadLeaderboard() {
+  try {
+    const [picksRes, resultsRes, waiversRes] = await Promise.all([
+      db.from('picks').select('*').order('submitted_at', { ascending: false }),
+      db.from('results').select('*').eq('advanced', true),
+      db.from('waivers').select('*'),
+    ]);
+
+    if (picksRes.error) throw picksRes.error;
+    if (resultsRes.error) throw resultsRes.error;
+    if (waiversRes.error) throw waiversRes.error;
+
+    allResults = resultsRes.data || [];
+    allWaivers = waiversRes.data || [];
+
+    // Deduplicate picks: keep most recent submission per player
+    const seen = new Map();
+    for (const pick of (picksRes.data || [])) {
+      if (!seen.has(pick.player_name)) seen.set(pick.player_name, pick);
+    }
+    const uniquePicks = [...seen.values()];
+
+    // Calculate scores
+    allPlayers = uniquePicks.map(pick => {
+      const { totalScore, breakdown, activeTeamIds } = calculateScore(
+        pick.player_name, pick.team_ids, allResults, allWaivers
+      );
+      return { ...pick, totalScore, breakdown, activeTeamIds };
+    });
+
+    document.getElementById('loadingState').classList.add('hidden');
+
+    if (allPlayers.length === 0) {
+      document.getElementById('noDataState').classList.remove('hidden');
+      document.getElementById('leaderboardWrap').classList.add('hidden');
+      return;
+    }
+
+    document.getElementById('noDataState').classList.add('hidden');
+    document.getElementById('leaderboardWrap').classList.remove('hidden');
+
+    renderLeaderboard();
+    renderResultsLegend();
+    updateSummary();
+
+    document.getElementById('lastRefresh').textContent =
+      'Last refreshed: ' + new Date().toLocaleTimeString();
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loadingState').classList.add('hidden');
+    showAlert('alertBox', `Error loading leaderboard: ${err.message || err}`, 'error');
+  }
+}
+
+// ── Render Table ──────────────────────────────────────────────
+function renderLeaderboard() {
+  // Sort
+  const sorted = [...allPlayers].sort((a, b) => {
+    if (sortField === 'score') return sortDir * (b.totalScore - a.totalScore);
+    if (sortField === 'name')  return sortDir * a.player_name.localeCompare(b.player_name);
+    return 0;
+  });
+
+  const tbody = document.getElementById('leaderboardBody');
+  tbody.innerHTML = '';
+
+  sorted.forEach((player, idx) => {
+    const rank = idx + 1;
+    const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+    const bestRound = getBestRound(player.breakdown);
+
+    // Main row
+    const tr = document.createElement('tr');
+    tr.className = 'player-row';
+    tr.innerHTML = `
+      <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+      <td class="player-name-cell">${escHtml(player.player_name)}</td>
+      <td style="text-align:right;"><span class="score-big">${player.totalScore}</span></td>
+      <td style="text-align:center;">${player.activeTeamIds.length}</td>
+      <td style="text-align:center;">${bestRound ? `<span class="round-pill ${bestRound==='champion'?'champion':''}">${roundLabel(bestRound)}</span>` : '<span class="text-muted text-sm">—</span>'}</td>
+      <td><span class="expand-toggle" onclick="toggleExpand('${escHtml(player.player_name)}', event)">▼ Teams</span></td>
+    `;
+    tr.onclick = () => toggleExpand(player.player_name, null);
+    tbody.appendChild(tr);
+
+    // Expandable teams row
+    const detailTr = document.createElement('tr');
+    detailTr.className = 'player-teams-row';
+    detailTr.id = `expand-${CSS.escape(player.player_name)}`;
+    detailTr.style.display = expandedPlayers.has(player.player_name) ? '' : 'none';
+    detailTr.innerHTML = `<td colspan="6">${buildTeamsDetail(player)}</td>`;
+    tbody.appendChild(detailTr);
+  });
+
+  // Update sort indicators
+  ['name','score'].forEach(f => {
+    const el = document.getElementById(`sort-${f}`);
+    if (el) el.textContent = sortField === f ? (sortDir === -1 ? '▼' : '▲') : '⇅';
+  });
+}
+
+function buildTeamsDetail(player) {
+  const rows = player.activeTeamIds.map(teamId => {
+    const team = getTeamById(teamId);
+    if (!team) return '';
+    const info = player.breakdown[teamId];
+    const earned = info ? info.score : 0;
+    const rounds = info ? info.rounds : {};
+    const underdog = team.price <= UNDERDOG_THRESHOLD;
+
+    const roundPills = Object.entries(rounds).map(([rid, pts]) =>
+      `<span class="round-pill${rid==='champion'?' champion':''}">${roundLabel(rid)} +${pts}</span>`
+    ).join('');
+
+    return `
+      <div class="team-detail-row">
+        <span class="team-detail-flag">${team.flag}</span>
+        <span class="team-detail-name">${escHtml(team.name)}</span>
+        <span class="team-detail-price">${team.price}pts${underdog ? ' 🐆' : ''}</span>
+        <div class="rounds-earned">${roundPills || '<span class="text-muted text-sm">Not yet advanced</span>'}</div>
+        <span class="team-detail-pts${underdog ? ' gold' : ''}">${earned > 0 ? '+'+earned : '0'}</span>
+      </div>
+    `;
+  }).join('');
+
+  return `<div class="teams-detail">${rows}</div>`;
+}
+
+function toggleExpand(playerName, event) {
+  if (event) event.stopPropagation();
+  const row = document.getElementById(`expand-${CSS.escape(playerName)}`);
+  if (!row) return;
+  if (expandedPlayers.has(playerName)) {
+    expandedPlayers.delete(playerName);
+    row.style.display = 'none';
+  } else {
+    expandedPlayers.add(playerName);
+    row.style.display = '';
+  }
+}
+
+function sortBy(field) {
+  if (sortField === field) {
+    sortDir *= -1;
+  } else {
+    sortField = field;
+    sortDir = field === 'score' ? -1 : 1;
+  }
+  renderLeaderboard();
+}
+
+function getBestRound(breakdown) {
+  const roundOrder = ['champion','final','sf','qf','r16','r32','group'];
+  for (const rid of roundOrder) {
+    for (const teamId of Object.keys(breakdown)) {
+      if (breakdown[teamId].rounds[rid]) return rid;
+    }
+  }
+  return null;
+}
+
+function roundLabel(rid) {
+  const map = { group:'Groups', r32:'R32', r16:'R16', qf:'QF', sf:'SF', final:'Final', champion:'🏆 Champ' };
+  return map[rid] || rid;
+}
+
+// ── Summary Bar ───────────────────────────────────────────────
+function updateSummary() {
+  const bar = document.getElementById('summaryBar');
+  bar.style.display = 'flex';
+  document.getElementById('statPlayers').textContent = allPlayers.length;
+  const leader = allPlayers.reduce((a, b) => b.totalScore > a.totalScore ? b : a, allPlayers[0]);
+  document.getElementById('statLeader').textContent = leader ? `${leader.player_name} (${leader.totalScore} pts)` : '—';
+  document.getElementById('statUpdated').textContent = new Date().toLocaleTimeString();
+}
+
+// ── Results Legend ────────────────────────────────────────────
+function renderResultsLegend() {
+  if (allResults.length === 0) return;
+  document.getElementById('resultsLegend').style.display = '';
+
+  const byRound = {};
+  for (const r of allResults) {
+    if (!byRound[r.round]) byRound[r.round] = [];
+    byRound[r.round].push(r.team_id);
+  }
+
+  const grid = document.getElementById('resultsGrid');
+  grid.innerHTML = '';
+
+  const roundOrder = ['group','r32','r16','qf','sf','final','champion'];
+  for (const rid of roundOrder) {
+    if (!byRound[rid]) continue;
+    const teams = byRound[rid].map(id => getTeamById(id)).filter(Boolean);
+    if (!teams.length) continue;
+
+    const box = document.createElement('div');
+    box.innerHTML = `
+      <div style="font-weight:700;color:var(--green-dark);margin-bottom:0.4rem;">${ROUNDS.find(r=>r.id===rid)?.label || rid}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">
+        ${teams.map(t => `<span class="team-chip advanced" style="font-size:0.8rem;">${t.flag} ${t.name}</span>`).join('')}
+      </div>
+    `;
+    grid.appendChild(box);
+  }
+}
+
+// ── Utility ───────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
