@@ -76,6 +76,12 @@
 
     <div id="alertBox"></div>
 
+    <!-- Submissions Closed Banner -->
+    <div id="lockedBanner" class="alert alert-warning" style="display:none; font-size:1rem;">
+      🔒 <strong>Submissions are closed.</strong> The tournament has started, so no new picks can be entered. Head to the
+      <a href="leaderboard.html">Leaderboard</a> or <a href="stats.html">Stats</a> to follow along.
+    </div>
+
     <!-- Teams by Tier -->
     <div id="teamsContainer"></div>
 
@@ -122,7 +128,32 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   renderTeams();
   updateBudget();
+  applyLockState();
 });
+
+// ── Submissions Lock ──────────────────────────────────────────
+function applyLockState() {
+  if (!PICKS_LOCKED) return;
+
+  const banner = document.getElementById('lockedBanner');
+  if (banner) banner.style.display = '';
+
+  // Disable name input and hide the submit section entirely.
+  const nameEl = document.getElementById('playerName');
+  if (nameEl) { nameEl.disabled = true; nameEl.placeholder = 'Submissions closed'; }
+
+  const submitSection = document.getElementById('submitSection');
+  if (submitSection) submitSection.style.display = 'none';
+
+  const budgetBar = document.getElementById('budgetBar');
+  if (budgetBar) budgetBar.style.display = 'none';
+
+  // Make team cards non-interactive.
+  document.querySelectorAll('.team-card').forEach(card => {
+    card.style.pointerEvents = 'none';
+    card.style.opacity = '0.6';
+  });
+}
 
 // ── Render Teams by Tier ──────────────────────────────────────
 function renderTeams() {
@@ -255,6 +286,11 @@ function clearPicks() {
 
 // ── Submit Picks to Supabase ──────────────────────────────────
 async function submitPicks() {
+  if (PICKS_LOCKED) {
+    showAlert('submitAlert', '🔒 Submissions are closed — the tournament has already started.', 'warning');
+    return;
+  }
+
   const nameEl = document.getElementById('playerName');
   const name = nameEl?.value.trim();
 
