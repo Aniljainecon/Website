@@ -15,6 +15,10 @@ const UNDERDOG_THRESHOLD = 5;  // price ≤ this → underdog
 const UNDERDOG_MULTIPLIER = 2;
 const ADMIN_PASSWORD = 'worldcup2026';
 
+// Set to true once the tournament has started to close submissions —
+// no new picks can be entered or updated while locked.
+const PICKS_LOCKED = true;
+
 // ── Rounds and Scoring ────────────────────────────────────────
 // 2026 format: 48 teams → R32 (32 advance) → R16 → QF → SF → Final
 const ROUNDS = [

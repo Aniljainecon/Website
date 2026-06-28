@@ -106,9 +106,9 @@
             <tr>
               <th style="width:44px;">Rank</th>
               <th class="sort-btn" onclick="sortBy('name')">Team <span id="sort-name"></span></th>
-              <th class="sort-btn" onclick="sortBy('score')" style="text-align:right;">Score <span id="sort-score">⇅</span></th>
+              <th class="sort-btn" onclick="sortBy('score')" style="text-align:right;">Score <span id="sort-score">▼</span></th>
               <th class="sort-btn" onclick="sortBy('cost')" style="text-align:right;">Cost (pts) <span id="sort-cost">⇅</span></th>
-              <th class="sort-btn" onclick="sortBy('eff')" style="text-align:right;">Score / Point <span id="sort-eff">▼</span></th>
+              <th class="sort-btn" onclick="sortBy('eff')" style="text-align:right;">Score / Point <span id="sort-eff">⇅</span></th>
             </tr>
           </thead>
           <tbody id="statsBody"></tbody>
@@ -134,8 +134,8 @@
 let db = null;
 let allTeams = [];
 let allResults = [];
-let sortField = 'eff';
-let sortDir = -1; // -1 = desc, 1 = asc
+let sortField = 'score';
+let sortDir = -1; // -1 = desc (highest first), 1 = asc
 
 document.addEventListener('DOMContentLoaded', async () => {
   db = createSupabaseClient();
@@ -186,9 +186,9 @@ function renderStats() {
   let rows = onlyScored ? allTeams.filter(r => r.score > 0) : [...allTeams];
 
   rows.sort((a, b) => {
-    if (sortField === 'eff')   return sortDir * (b.efficiency - a.efficiency);
-    if (sortField === 'score') return sortDir * (b.score - a.score);
-    if (sortField === 'cost')  return sortDir * (b.cost - a.cost);
+    if (sortField === 'eff')   return sortDir * (a.efficiency - b.efficiency);
+    if (sortField === 'score') return sortDir * (a.score - b.score);
+    if (sortField === 'cost')  return sortDir * (a.cost - b.cost);
     if (sortField === 'name')  return sortDir * a.team.name.localeCompare(b.team.name);
     return 0;
   });
