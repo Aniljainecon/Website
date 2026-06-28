@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stats — World Cup Portfolio Game 2026</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sort-btn { cursor: pointer; user-select: none; }
+    .sort-btn:hover { background: rgba(255,255,255,0.15); }
+    .eff-big { font-size: 1.15rem; font-weight: 800; color: var(--green-mid); }
+    .alive-star { color: var(--gold-dark); font-weight: 800; }
+    .no-data {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--gray-600);
+    }
+    .no-data .icon { font-size: 3rem; margin-bottom: 0.75rem; }
+    .refresh-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.7);
+    }
+    .dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .team-name-cell { font-weight: 700; }
+    .team-flag { font-size: 1.2rem; margin-right: 0.45rem; }
+    .underdog-tag { font-size: 0.7rem; color: var(--gold-dark); font-weight: 700; margin-left: 0.35rem; }
+    .footnote {
+      font-size: 0.82rem;
+      color: var(--gray-600);
+      margin-top: 0.75rem;
+    }
+    .footnote .alive-star { margin-right: 0.25rem; }
+    .bar-cell { min-width: 120px; }
+    .eff-bar-track {
+      background: var(--gray-200);
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+    .eff-bar-fill {
+      background: linear-gradient(90deg, var(--green-mid), var(--green-bright));
+      height: 100%;
+      border-radius: 999px;
+    }
+    .row-dim { opacity: 0.5; }
+  </style>
+</head>
+<body>
+
+<!-- ── Site Header ─────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="site-logo">
+      <span class="trophy">🏆</span>
+      World Cup Portfolio Game
+      <span class="year">2026</span>
+    </a>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="leaderboard.html">Leaderboard</a>
+      <a href="stats.html" class="active">Stats</a>
+      <a href="pick.html" class="btn-nav">Pick Teams →</a>
+    </nav>
+    <div class="refresh-info">
+      <div class="dot"></div>
+      <span>Live · refreshes every 60s</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── Hero ────────────────────────────────────────────────── -->
+<div style="background:linear-gradient(135deg,var(--green-dark),var(--green-mid));color:white;padding:2rem 1rem;text-align:center;">
+  <h1>📈 Stats</h1>
+  <p style="opacity:0.85;font-size:1rem;margin-top:0.25rem;">Score per point — which teams are the best value</p>
+</div>
+
+<!-- ── Main ─────────────────────────────────────────────────── -->
+<main class="container">
+  <section class="section" style="padding-top:1.5rem;">
+
+    <div id="alertBox"></div>
+
+    <!-- Loading -->
+    <div id="loadingState" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading stats…</p>
+    </div>
+
+    <!-- Controls -->
+    <div id="controls" class="hidden" style="display:flex;justify-content:flex-end;margin-bottom:0.75rem;">
+      <label class="text-sm" style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+        <input type="checkbox" id="onlyScored" onchange="renderStats()"> Hide teams with 0 points
+      </label>
+    </div>
+
+    <!-- Stats Table -->
+    <div id="statsWrap" class="hidden">
+      <div class="table-wrap card" style="padding:0; overflow:hidden;">
+        <table id="statsTable">
+          <thead>
+            <tr>
+              <th style="width:44px;">Rank</th>
+              <th class="sort-btn" onclick="sortBy('name')">Team <span id="sort-name"></span></th>
+              <th class="sort-btn" onclick="sortBy('score')" style="text-align:right;">Score <span id="sort-score">⇅</span></th>
+              <th class="sort-btn" onclick="sortBy('cost')" style="text-align:right;">Cost (pts) <span id="sort-cost">⇅</span></th>
+              <th class="sort-btn" onclick="sortBy('eff')" style="text-align:right;">Score / Point <span id="sort-eff">▼</span></th>
+            </tr>
+          </thead>
+          <tbody id="statsBody"></tbody>
+        </table>
+      </div>
+
+      <p class="footnote" id="footnote">
+        <span class="alive-star">*</span> still in the World Cup — this team is alive in the bracket.
+      </p>
+      <p class="text-muted text-sm text-center mt-2" id="lastRefresh"></p>
+    </div>
+
+  </section>
+</main>
+
+<footer>
+  <p>🏆 World Cup Portfolio Game · 2026 FIFA World Cup · Jun 11 – Jul 19, 2026</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="app.js"></script>
+<script>
+let db = null;
+let allTeams = [];
+let allResults = [];
+let sortField = 'eff';
+let sortDir = -1; // -1 = desc, 1 = asc
+
+document.addEventListener('DOMContentLoaded', async () => {
+  db = createSupabaseClient();
+  if (!db) {
+    showAlert('alertBox', '⚠️ Supabase not configured. See SETUP.md to connect the database.', 'warning');
+    document.getElementById('loadingState').classList.add('hidden');
+    return;
+  }
+  await loadStats();
+  setInterval(loadStats, 60000);
+});
+
+// ── Load data from Supabase ───────────────────────────────────
+async function loadStats() {
+  try {
+    const resultsRes = await db.from('results').select('*').eq('advanced', true);
+    if (resultsRes.error) throw resultsRes.error;
+    allResults = resultsRes.data || [];
+
+    // Compute score / cost / efficiency / alive status for every nation
+    allTeams = TEAMS.map(team => {
+      const score = getTeamScore(team.id, allResults);
+      const cost = team.price;
+      const efficiency = cost > 0 ? score / cost : 0;
+      const stillIn = isTeamStillIn(team.id, allResults);
+      return { team, score, cost, efficiency, stillIn };
+    });
+
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('controls').classList.remove('hidden');
+    document.getElementById('statsWrap').classList.remove('hidden');
+
+    renderStats();
+
+    document.getElementById('lastRefresh').textContent =
+      'Last refreshed: ' + new Date().toLocaleTimeString();
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loadingState').classList.add('hidden');
+    showAlert('alertBox', `Error loading stats: ${err.message || err}`, 'error');
+  }
+}
+
+// ── Render Table ──────────────────────────────────────────────
+function renderStats() {
+  const onlyScored = document.getElementById('onlyScored').checked;
+  let rows = onlyScored ? allTeams.filter(r => r.score > 0) : [...allTeams];
+
+  rows.sort((a, b) => {
+    if (sortField === 'eff')   return sortDir * (b.efficiency - a.efficiency);
+    if (sortField === 'score') return sortDir * (b.score - a.score);
+    if (sortField === 'cost')  return sortDir * (b.cost - a.cost);
+    if (sortField === 'name')  return sortDir * a.team.name.localeCompare(b.team.name);
+    return 0;
+  });
+
+  const maxEff = Math.max(...rows.map(r => r.efficiency), 0.0001);
+
+  const tbody = document.getElementById('statsBody');
+  tbody.innerHTML = '';
+
+  rows.forEach((row, idx) => {
+    const rank = idx + 1;
+    const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : 'rank-other';
+    const star = row.stillIn ? '<span class="alive-star" title="Still in the World Cup">*</span>' : '';
+    const underdog = isUnderdog(row.team) ? '<span class="underdog-tag">🐆 2×</span>' : '';
+    const barPct = Math.round((row.efficiency / maxEff) * 100);
+
+    const tr = document.createElement('tr');
+    if (row.score === 0) tr.className = 'row-dim';
+    tr.innerHTML = `
+      <td><span class="rank-badge ${rankClass}">${rank}</span></td>
+      <td class="team-name-cell">
+        <span class="team-flag">${row.team.flag}</span>${escHtml(row.team.name)}${star}${underdog}
+      </td>
+      <td style="text-align:right;">${row.score}</td>
+      <td style="text-align:right;">${row.cost}</td>
+      <td style="text-align:right;" class="bar-cell">
+        <span class="eff-big">${row.efficiency.toFixed(2)}</span>
+        <div class="eff-bar-track"><div class="eff-bar-fill" style="width:${barPct}%;"></div></div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Update sort indicators
+  ['name','score','cost','eff'].forEach(f => {
+    const el = document.getElementById(`sort-${f}`);
+    if (el) el.textContent = sortField === f ? (sortDir === -1 ? '▼' : '▲') : '⇅';
+  });
+}
+
+function sortBy(field) {
+  if (sortField === field) {
+    sortDir *= -1;
+  } else {
+    sortField = field;
+    sortDir = field === 'name' ? 1 : -1;
+  }
+  renderStats();
+}
+
+// ── Utility ───────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>

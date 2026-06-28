@@ -143,6 +143,56 @@ function calculateScore(playerName, teamIds, allResults) {
   return { totalScore, breakdown, activeTeamIds };
 }
 
+/**
+ * Determine which teams are still alive in the tournament.
+ * A team is "still in" if it advanced in the latest round that has any
+ * recorded results (the current frontier of the bracket). Before any
+ * results are recorded, every team is considered still in.
+ * Returns a Set of team_ids that are still alive (or null if no results yet,
+ * meaning all teams are still in).
+ */
+function getAliveTeamIds(allResults) {
+  const roundOrder = ['group', 'r32', 'r16', 'qf', 'sf', 'final', 'champion'];
+  const advancedByRound = {};
+  for (const result of allResults) {
+    if (!result.advanced) continue;
+    if (!advancedByRound[result.round]) advancedByRound[result.round] = new Set();
+    advancedByRound[result.round].add(result.team_id);
+  }
+  // Find the furthest round that has any advanced teams.
+  let frontier = null;
+  for (const rid of roundOrder) {
+    if (advancedByRound[rid] && advancedByRound[rid].size > 0) frontier = rid;
+  }
+  if (!frontier) return null; // no results yet → everyone still in
+  return advancedByRound[frontier];
+}
+
+/** True if a single team is still alive in the tournament. */
+function isTeamStillIn(teamId, allResults) {
+  const alive = getAliveTeamIds(allResults);
+  if (alive === null) return true; // tournament hasn't started recording results
+  return alive.has(teamId);
+}
+
+/**
+ * Points a single team has earned so far, summed over every round it advanced
+ * in, with the underdog multiplier applied (mirrors calculateScore's per-team
+ * logic but independent of any player's picks).
+ */
+function getTeamScore(teamId, allResults) {
+  const team = getTeamById(teamId);
+  if (!team) return 0;
+  const mult = getMultiplier(team);
+  let score = 0;
+  for (const result of allResults) {
+    if (result.advanced && result.team_id === teamId) {
+      score += (ROUND_POINTS[result.round] || 0) * mult;
+    }
+  }
+  return score;
+}
+
 /** Initialize and return a Supabase client. */
 function createSupabaseClient() {
   if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
