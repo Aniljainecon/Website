@@ -13,7 +13,6 @@ const BUDGET = 100;
 const WAIVER_BUDGET = 10;
 const UNDERDOG_THRESHOLD = 5;  // price ≤ this → underdog
 const UNDERDOG_MULTIPLIER = 2;
-const ADMIN_PASSWORD = 'worldcup2026';
 
 // ── Rounds and Scoring ────────────────────────────────────────
 // 2026 format: 48 teams → R32 (32 advance) → R16 → QF → SF → Final
