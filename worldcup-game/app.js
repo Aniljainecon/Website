@@ -13,7 +13,6 @@ const BUDGET = 100;
 const WAIVER_BUDGET = 10;
 const UNDERDOG_THRESHOLD = 5;  // price ≤ this → underdog
 const UNDERDOG_MULTIPLIER = 2;
-const ADMIN_PASSWORD = 'worldcup2026';
 
 // Set to true once the tournament has started to close submissions —
 // no new picks can be entered or updated while locked.
