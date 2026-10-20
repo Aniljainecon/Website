@@ -6,7 +6,11 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git pull *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(curl -s -o /dev/null -w \"app.js: %{http_code}\\\\n\" https://anilkjain.com/app.js)",
+      "Bash(curl -s -o /dev/null -w \"admin.html: %{http_code}\\\\n\" https://anilkjain.com/admin.html)",
+      "Bash(curl -s https://anilkjain.com/app.js)",
+      "Bash(echo \"--- exit: $? ---\")"
     ]
   }
 }
