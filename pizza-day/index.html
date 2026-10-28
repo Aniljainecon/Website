@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pizza Day</title>
+<meta name="description" content="A no-reading pizza shop for little ones: letters on the sign, dough balls by size, big and little letters, topping orders, more or fewer, fair shares, slices left and pizza deliveries.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pizza Day">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#7fd3c6">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+
+/* Layout: level dots and stars across the top, one tiled kitchen stage per level, big round answer buttons in a dock below. One bright look, no dark variant. */
+:root{
+  --wall:#7fd3c6; --wall-line:#6cc2b5; --counter:#eaa95e; --counter-edge:#c98743;
+  --ink:#3b2146; --sauce:#d6342a; --cheese:#ffd54a; --crust:#e3a04f;
+  --sun:#ffcf3d; --leaf:#4cc36b; --tomato:#e5483b; --white:#fffdf7; --shade:rgba(59,33,70,.2);
+  --wood1:#dca061; --wood2:#c4813f; --road:#6b6178; --grass:#8fd46b; --sky:#bfe9ff; --miss:#d4cbdb;
+  --font:'Fredoka',ui-rounded,'Arial Rounded MT Bold',system-ui,sans-serif;
+  color-scheme:light;
+}
+html{box-sizing:border-box;height:100%}
+body{margin:0;height:100%;box-sizing:border-box;background:var(--wall);color:var(--ink);font-family:var(--font);
+  overflow:hidden;overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+button{font-family:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:4px solid var(--ink);outline-offset:3px}
+#app{height:100%;display:flex;flex-direction:column}
+#top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px;padding:10px 0 8px}
+#steps{display:flex;gap:clamp(4px,1.1vmin,10px);flex-wrap:wrap}
+.dot{width:clamp(30px,5.4vmin,50px);aspect-ratio:1;border-radius:50%;background:var(--white);border:3px solid var(--ink);display:grid;place-items:center;padding:0;box-shadow:0 3px 0 var(--shade);transition:transform .25s,background .25s}
+.dot svg{width:68%;height:68%}
+.dot.on{background:var(--sun);transform:scale(1.15) translateY(-2px)}
+.dot.done{background:var(--leaf)}
+.ic{font-family:var(--font);font-weight:700}
+#right{display:flex;align-items:center;gap:12px}
+#starRow{display:flex;gap:3px}
+.st{width:clamp(24px,4.6vmin,40px);height:auto;overflow:visible;display:block}
+.st path{fill:var(--white);stroke:var(--ink);stroke-width:1.8;stroke-linejoin:round}
+.st.gold path{fill:var(--sun)}
+.st.gold{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+.st.miss path{fill:var(--miss)}
+#mute{width:clamp(34px,6vmin,54px);aspect-ratio:1;border-radius:50%;background:var(--white);border:3px solid var(--ink);display:grid;place-items:center;padding:0;box-shadow:0 3px 0 var(--shade)}
+#mute svg{width:60%;height:60%}
+#mute.off .waves{display:none}
+#mute:not(.off) .slash{display:none}
+
+#stage{flex:1;min-height:0;position:relative;overflow:hidden;border-radius:28px;border:4px solid var(--ink);
+  background:linear-gradient(var(--wall) 0 56%,var(--counter) 56% 100%)}
+#stage::before{content:"";position:absolute;inset:0 0 44% 0;
+  background-image:repeating-linear-gradient(90deg,transparent 0 78px,var(--wall-line) 78px 80px),repeating-linear-gradient(0deg,transparent 0 78px,var(--wall-line) 78px 80px)}
+#stage::after{content:"";position:absolute;left:0;right:0;top:56%;height:14px;background:var(--counter-edge)}
+#lv{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--H)*.05);padding:calc(var(--H)*.04) 14px;box-sizing:border-box}
+.row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:calc(var(--W)*.05)}
+#fx{position:absolute;inset:0;z-index:10;pointer-events:none;overflow:hidden}
+.fx{position:absolute;left:0;top:0;will-change:transform,opacity}
+.fx>svg{display:block;width:100%;height:100%;overflow:visible}
+.fx .choice{width:100%;height:100%;box-shadow:none}
+.pop{transform-box:fill-box;transform-origin:center;animation:pop .28s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes bob{50%{transform:scale(1.08)}}
+.glow{animation:glow .9s ease-in-out infinite}
+@keyframes glow{50%{filter:drop-shadow(0 0 8px #fff6b0) drop-shadow(0 0 4px #ffcf3d);transform:scale(1.1)}}
+.shake{animation:shake .45s}
+@keyframes shake{20%{transform:translateX(-10px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+.cutline{position:absolute;height:5px;border-radius:3px;background:var(--white);box-shadow:0 0 0 2px var(--ink);transform-origin:center;animation:cut .25s ease-out forwards}
+@keyframes cut{from{transform:rotate(var(--a)) scaleX(0)}to{transform:rotate(var(--a)) scaleX(1)}}
+
+.round-act{position:absolute;bottom:clamp(8px,2vmin,18px);width:clamp(70px,13vmin,112px);aspect-ratio:1;border-radius:50%;border:5px solid var(--ink);display:grid;place-items:center;padding:0;box-shadow:0 6px 0 var(--shade);z-index:7;transition:transform .2s}
+.round-act svg{width:58%;height:58%}
+.round-act:active{transform:scale(.92)}
+#check{right:clamp(8px,2vmin,18px);background:var(--leaf);animation:bob 1s ease-in-out infinite}
+#undo{left:clamp(8px,2vmin,18px);background:var(--white)}
+
+#dock{height:clamp(96px,20vmin,170px);display:flex;align-items:center;justify-content:center;gap:clamp(8px,2.4vmin,24px);padding:10px 0 12px;box-sizing:content-box}
+.bowl{width:clamp(56px,14vmin,120px);aspect-ratio:1;border-radius:50%;border:4px solid var(--ink);background:var(--white);display:grid;place-items:center;padding:0;box-shadow:0 5px 0 var(--shade);transition:transform .2s,background .2s}
+.bowl svg{width:84%;height:84%}
+.bowl.sel{transform:translateY(-12px) scale(1.12);background:var(--sun)}
+.choice,.num-btn{width:clamp(64px,15vmin,124px);aspect-ratio:1;border-radius:50%;border:5px solid var(--ink);background:var(--white);font:700 clamp(40px,10vmin,88px)/1 var(--font);color:var(--ink);display:grid;place-items:center;padding:0 0 .12em;box-shadow:0 5px 0 var(--shade);box-sizing:border-box}
+.num-btn{background:var(--sun);padding:0 0 .06em}
+
+/* customers */
+.cust{aspect-ratio:1;position:relative}
+.cust svg.face{width:100%;height:100%;overflow:visible;display:block}
+.mouth-open{display:none}
+.cust.chew .mouth-open{display:inline}
+.cust.chew .smile{display:none}
+.cust.chew svg.face{animation:chew .26s ease-in-out 3}
+@keyframes chew{50%{transform:scale(1.06,.94)}}
+.cust.jump svg.face{animation:jump .5s ease-out 3}
+@keyframes jump{40%{transform:translateY(-14%)}}
+
+/* pizza wedges (fair shares, party) */
+.w{transition:opacity .25s,transform .45s cubic-bezier(.3,1.4,.5,1)}
+.cut .w{transform:translate(var(--gx),var(--gy))}
+.w.gone{opacity:0}
+.wo{opacity:0;transition:opacity .2s}
+.cut .wo{opacity:1}
+.cut .ring{opacity:0}
+
+/* L1 shop sign */
+.model{display:flex;gap:.25em;background:var(--white);border:4px solid var(--ink);border-radius:14px;padding:.15em .6em;font:700 calc(var(--t)*.5)/1.1 var(--font);box-shadow:0 4px 0 var(--shade);transform:rotate(-2deg)}
+.sign{display:flex;gap:calc(var(--t)*.15);padding:calc(var(--t)*.22) calc(var(--t)*.3);background:var(--tomato);border:5px solid var(--ink);border-radius:calc(var(--t)*.3);box-shadow:0 6px 0 var(--shade);transition:background .3s}
+.sign.lit{background:var(--sun);animation:bob .6s ease-in-out 3}
+.slot{position:relative;width:var(--t);height:var(--t);box-sizing:border-box;border-radius:calc(var(--t)*.18);border:4px dashed rgba(255,253,247,.85);display:grid;place-items:center;font:700 calc(var(--t)*.66)/1 var(--font);color:rgba(255,253,247,.5)}
+.sign.lit .slot{border-color:transparent}
+.tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:calc(var(--t)*.35);max-width:94%}
+.tile{position:relative;z-index:1;width:var(--t);height:var(--t);box-sizing:border-box;border-radius:calc(var(--t)*.18);background:var(--white);border:4px solid var(--ink);display:grid;place-items:center;font:700 calc(var(--t)*.66)/1 var(--font);color:var(--ink);box-shadow:0 5px 0 var(--shade);touch-action:none;cursor:grab}
+.tile.drag{z-index:30;box-shadow:0 14px 12px var(--shade);cursor:grabbing}
+.slot .tile{position:absolute;inset:-4px;width:auto;height:auto;box-shadow:none;cursor:default}
+
+/* L2 dough balls */
+.tray{display:flex;align-items:flex-end;gap:calc(var(--bs)*.12);padding:calc(var(--bs)*.12) calc(var(--bs)*.16);background:linear-gradient(var(--wood1),var(--wood2));border:5px solid var(--ink);border-radius:calc(var(--bs)*.24);box-shadow:0 6px 0 var(--shade)}
+.spot{width:var(--bs);height:var(--bs);box-sizing:border-box;border-radius:50%;border:4px dashed rgba(59,33,70,.35);display:flex;align-items:flex-end;justify-content:center}
+.legend{width:calc(var(--bs)*1.8);max-width:60%}
+.legend svg{width:100%;display:block}
+.balls{display:flex;align-items:flex-end;justify-content:center;gap:calc(var(--bs)*.2);min-height:var(--bs)}
+.ball{flex:none;width:calc(var(--bs)*var(--k));aspect-ratio:1;padding:0;border:0;background:none;border-radius:50%}
+.spot .ball{width:calc((var(--bs) - 8px)*var(--k));cursor:default}
+.ball svg{display:block;width:100%;height:100%;overflow:visible}
+
+/* L3 letters */
+.l3pz{width:min(calc(var(--H)*.86),calc(var(--W)*.7));aspect-ratio:1}
+.l3pz svg,.l4pz svg,.l5pz svg,.l6pz svg,.l9pz svg{width:100%;height:100%;display:block;overflow:visible}
+.bigL,.litL{font-family:var(--font);font-weight:700;fill:var(--ink);stroke:var(--white);stroke-width:7px;paint-order:stroke;stroke-linejoin:round;transition:opacity .3s}
+.bigL{font-size:104px}
+.litL{font-size:76px}
+
+/* L4 order up */
+.l4{gap:calc(var(--W)*.04)}
+.ticket{position:relative;background:var(--white);border:4px solid var(--ink);border-radius:12px;padding:calc(var(--H)*.045) calc(var(--H)*.035) calc(var(--H)*.03);display:flex;flex-direction:column;gap:calc(var(--H)*.03);box-shadow:0 6px 0 var(--shade);transform:rotate(-3deg)}
+.ticket .clip{position:absolute;left:30%;right:30%;top:-14px;height:20px;background:#c9ced6;border:4px solid var(--ink);border-radius:6px}
+.line{display:flex;align-items:center;gap:calc(var(--H)*.02)}
+.num{font:700 calc(var(--H)*.15)/1 var(--font);min-width:.65em;text-align:center}
+.line>svg{width:calc(var(--H)*.11);height:calc(var(--H)*.11)}
+.dots{display:grid;grid-template-columns:repeat(3,auto);gap:4px}
+.dots i{width:calc(var(--H)*.032);aspect-ratio:1;border-radius:50%;background:var(--ink)}
+.l4pz{width:min(calc(var(--H)*.84),calc(var(--W)*.56));aspect-ratio:1;touch-action:none;transition:transform .7s ease-in,opacity .7s}
+.l4pz.out{transform:translateX(80vw) rotate(50deg);opacity:0}
+.bnum{font-family:var(--font);font-weight:700;font-size:13px;fill:var(--white)}
+
+/* L5 more or fewer */
+.l5pz{position:relative;width:min(calc(var(--H)*.6),calc(var(--W)*.4));aspect-ratio:1;border:0;background:none;padding:0;border-radius:50%}
+.cnt{position:absolute;left:50%;top:0;z-index:2;transform:translate(-50%,-55%) scale(0);min-width:1.3em;padding:0 .2em;border-radius:999px;background:var(--sun);border:4px solid var(--ink);font:700 calc(var(--H)*.1)/1.25 var(--font);text-align:center;transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.l5pz.show .cnt{transform:translate(-50%,-55%) scale(1)}
+
+/* L6 fair shares */
+.table{display:flex;justify-content:center;gap:calc(var(--W)*.03)}
+.friend{width:var(--fw);display:flex;flex-direction:column;align-items:center;gap:4px}
+.friend .cust{width:90%}
+.plate{width:100%;aspect-ratio:1;border-radius:50%;background:var(--white);border:5px solid var(--ink);box-shadow:0 5px 0 var(--shade),inset 0 0 0 calc(var(--fw)*.07) #f1ece1;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:2px;padding:14%;box-sizing:border-box}
+.ps{width:30%;aspect-ratio:1}
+.plate.many .ps{width:23%}
+.ps svg{width:100%;height:100%;display:block}
+.l6pz{width:min(calc(var(--H)*.34),calc(var(--W)*.4));aspect-ratio:1}
+
+/* L7 slices left */
+.l7c{width:min(calc(var(--H)*.3),calc(var(--W)*.3))}
+.board{display:flex;gap:calc(var(--sw)*.08);padding:calc(var(--sw)*.14) calc(var(--sw)*.2);background:linear-gradient(var(--wood1),var(--wood2));border:5px solid var(--ink);border-radius:calc(var(--sw)*.25);box-shadow:0 6px 0 var(--shade)}
+.sl{position:relative;width:var(--sw);aspect-ratio:1}
+.sl svg{width:100%;height:100%;display:block;overflow:visible}
+.badge{position:absolute;right:-6%;top:-8%;width:42%;aspect-ratio:1;border-radius:50%;background:var(--ink);color:var(--white);font:700 calc(var(--sw)*.26)/1 var(--font);display:grid;place-items:center;animation:pop .3s cubic-bezier(.3,1.6,.5,1)}
+
+/* L8 delivery */
+#lv.street{background:linear-gradient(var(--sky) 0 16%,var(--grass) 16% 100%);display:grid;grid-template-rows:minmax(0,1fr) auto minmax(0,1fr);gap:0;padding:calc(var(--H)*.03) 12px}
+.hrow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:calc(var(--W)*.02);align-items:end;justify-items:center;min-height:0}
+.hrow.low{align-items:start}
+.house{position:relative;width:min(100%,calc(var(--H)*.29));aspect-ratio:100/110;padding:0;border:0;background:none}
+.house>svg{width:100%;height:100%;display:block;overflow:visible}
+.hnum{font-family:var(--font);font-weight:700;font-size:23px;fill:var(--ink)}
+.hf{position:absolute;left:25%;width:50%;top:-34%;aspect-ratio:1;transform:scale(0);transition:transform .4s cubic-bezier(.3,1.6,.5,1);pointer-events:none}
+.hf svg{width:100%;height:100%;display:block;overflow:visible}
+.house.home .hf{transform:scale(1)}
+.road{position:relative;height:calc(var(--H)*.15);margin:calc(var(--H)*.02) -12px;background:var(--road) repeating-linear-gradient(90deg,var(--white) 0 28px,transparent 28px 56px) 0 50%/100% 6px no-repeat;border-block:5px solid var(--white)}
+.scooter{position:absolute;left:0;top:50%;width:calc(var(--H)*.15);aspect-ratio:1.3;transform:translate(0,-50%)}
+.scooter svg{width:100%;height:100%;display:block;overflow:visible;transition:transform .2s}
+.pbox{height:100%;aspect-ratio:1.2}
+.pbox svg{width:100%;height:100%;display:block}
+.boxn{font-family:var(--font);font-weight:700;font-size:44px;fill:var(--ink)}
+
+/* L9 party */
+.l9c{width:min(calc(var(--H)*.28),calc(var(--W)*.3))}
+.l9pz{width:min(calc(var(--H)*.6),calc(var(--W)*.6));aspect-ratio:1;cursor:pointer}
+
+/* level done */
+#done{position:absolute;inset:0;z-index:9;background:rgba(127,211,198,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4vmin}
+#done .big{display:flex;gap:2vmin;flex-wrap:wrap;justify-content:center;padding:0 16px}
+#done .big .st{width:clamp(50px,12vmin,110px);animation:pop .5s cubic-bezier(.3,1.6,.5,1) backwards}
+#done .big .st:nth-child(2){animation-delay:.12s}
+#done .big .st:nth-child(3){animation-delay:.24s}
+#done .big .st:nth-child(4){animation-delay:.36s}
+#done .big .st:nth-child(5){animation-delay:.48s}
+#done .big .st:nth-child(6){animation-delay:.6s}
+.donePz{width:min(40vmin,260px);aspect-ratio:1;animation:bob 1.6s ease-in-out infinite}
+.donePz svg{width:100%;height:100%;display:block}
+#next{width:clamp(100px,20vmin,170px);aspect-ratio:1;border-radius:50%;background:var(--leaf);border:6px solid var(--ink);display:grid;place-items:center;padding:0;box-shadow:0 8px 0 var(--shade);animation:bob 1.1s ease-in-out infinite}
+#next svg{width:55%;height:55%}
+
+#intro{position:fixed;inset:0;z-index:50;background:var(--wall);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vmin;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  transition:opacity .5s,visibility .5s}
+#intro.gone{opacity:0;visibility:hidden}
+#intro h1{margin:0;font-size:clamp(44px,12vmin,120px);line-height:1;text-wrap:balance;text-shadow:0 5px 0 var(--white)}
+#intro .art{width:min(52vmin,340px);animation:bob 2s ease-in-out infinite}
+#play{width:clamp(110px,22vmin,200px);aspect-ratio:1;border-radius:50%;background:var(--sun);border:6px solid var(--ink);display:grid;place-items:center;padding:0;box-shadow:0 8px 0 var(--shade);animation:bob 1.2s ease-in-out infinite}
+#play svg{width:50%;height:50%;margin-left:8%}
+@media (prefers-reduced-motion:reduce){#check,#intro .art,#play,#next,.donePz,.glow{animation:none}}
+</style>
+</head>
+<body>
+<div id="intro">
+  <svg class="art" viewBox="-100 -100 200 200" aria-hidden="true">
+    <circle r="88" fill="#c98743" stroke="#3b2146" stroke-width="4"/>
+    <circle r="80" fill="#e6ad5e" stroke="#3b2146" stroke-width="3"/>
+    <circle r="70" fill="#d6342a"/>
+    <g fill="#ffd54a"><rect x="-40" y="-52" width="22" height="6" rx="3" transform="rotate(20 -40 -52)"/><rect x="10" y="-58" width="22" height="6" rx="3" transform="rotate(-30)"/><rect x="30" y="20" width="22" height="6" rx="3" transform="rotate(50 30 20)"/><rect x="-55" y="12" width="22" height="6" rx="3" transform="rotate(-15 -55 12)"/><rect x="-10" y="45" width="22" height="6" rx="3"/><rect x="-14" y="-8" width="22" height="6" rx="3" transform="rotate(35)"/></g>
+    <g fill="#c8372d" stroke="#8e2119" stroke-width="2"><circle cx="-30" cy="-22" r="13"/><circle cx="26" cy="-30" r="13"/><circle cx="34" cy="26" r="13"/><circle cx="-24" cy="30" r="13"/><circle cx="2" cy="0" r="13"/></g>
+    <g fill="#4cb050" stroke="#2d7a38" stroke-width="2"><path d="M-48,0 Q-40,-10 -32,0 Q-40,10 -48,0Z"/><path d="M52,-4 Q60,-14 68,-4 Q60,6 52,-4Z" transform="scale(.7) translate(10 10)"/></g>
+  </svg>
+  <h1>Pizza Day</h1>
+  <button id="play" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M5 3 L21 12 L5 21 Z" fill="#fffdf7" stroke="#3b2146" stroke-width="2.4" stroke-linejoin="round"/></svg></button>
+</div>
+
+<div id="app">
+  <div id="top">
+    <div id="steps"></div>
+    <div id="right">
+      <div id="starRow"></div>
+      <button id="mute" aria-label="Sound on or off"><svg viewBox="0 0 24 24" fill="none" stroke="#3b2146" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9 H8 L13 5 V19 L8 15 H4 Z" fill="#ffcf3d"/><path class="waves" d="M16 9 Q18.5 12 16 15 M18.5 6.5 Q23 12 18.5 17.5"/><path class="slash" d="M17 8 L22 16 M22 8 L17 16"/></svg></button>
+    </div>
+  </div>
+
+  <div id="stage">
+    <div id="lv"></div>
+    <button id="undo" class="round-act" aria-label="Take one off" hidden><svg viewBox="0 0 24 24" fill="none" stroke="#3b2146" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6 L4 11 L9 16"/><path d="M4 11 H15 A5 5 0 0 1 15 21 H11"/></svg></button>
+    <button id="check" class="round-act" aria-label="Done" hidden><svg viewBox="0 0 24 24" fill="none" stroke="#fffdf7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 L10 18 L20 6"/></svg></button>
+    <div id="done" hidden><div class="big"></div><button id="next" aria-label="Next"></button></div>
+    <div id="fx"></div>
+  </div>
+
+  <div id="dock"></div>
+</div>
+
+<script>
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const NS = 'http://www.w3.org/2000/svg';
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function svgEl(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+
+/* ---------- sound ---------- */
+let AC = null, muted = false;
+function ac() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(f, d = .15, type = 'sine', v = .2, slide = 0, when = 0) {
+  if (muted) return; const c = ac(); if (!c) return;
+  const t = c.currentTime + when, o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t + d);
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(v, t + .015); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+  o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + d + .05);
+}
+function noise(d = .12, v = .2, freq = 2000, q = 1, type = 'bandpass') {
+  if (muted) return; const c = ac(); if (!c) return;
+  const len = Math.max(1, Math.floor(c.sampleRate * d)), b = c.createBuffer(1, len, c.sampleRate), a = b.getChannelData(0);
+  for (let i = 0; i < len; i++) a[i] = Math.random() * 2 - 1;
+  const t = c.currentTime, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+  s.buffer = b; f.type = type; f.frequency.value = freq; f.Q.value = q;
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+  s.connect(f); f.connect(g); g.connect(c.destination); s.start(t);
+}
+const S = {
+  pop: () => tone(520, .12, 'sine', .25, 500),
+  place: () => { tone(300, .1, 'triangle', .3, -120); noise(.06, .15, 900, 1, 'lowpass'); },
+  ding: () => { tone(1318, .9, 'sine', .25); tone(1760, .7, 'sine', .15, 0, .02); },
+  chomp: () => { noise(.12, .3, 1200, 1, 'bandpass'); tone(140, .12, 'sine', .35, -60); },
+  cut: () => noise(.18, .2, 3000, 1, 'bandpass'),
+  whoosh: () => noise(.35, .15, 800, .8, 'bandpass'),
+  yay: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, .25, 'triangle', .22, 0, i * .11)),
+  oops: () => { tone(392, .16, 'triangle', .2); tone(311, .28, 'triangle', .2, 0, .15); },
+  star: () => [880, 1175, 1568].forEach((f, i) => tone(f, .18, 'sine', .16, 0, i * .07)),
+  dingdong: () => { tone(784, .5, 'sine', .25); tone(622, .8, 'sine', .25, 0, .4); },
+  count: k => tone(440 * Math.pow(2, Math.min(k, 12) * 2 / 12), .12, 'sine', .18)
+};
+
+/* ---------- voice: resolves when speech ends (or after a timeout) ---------- */
+function say(t) {
+  return new Promise(res => {
+    let fin = false, to = 0;
+    const done = () => { if (fin) return; fin = true; clearTimeout(to); res(); };
+    const can = !muted && 'speechSynthesis' in window;
+    to = setTimeout(done, can ? 1600 + t.length * 85 : 250 + t.length * 30);
+    if (!can) return;
+    try {
+      const ss = speechSynthesis;
+      if (ss.speaking || ss.pending) ss.cancel();
+      const u = new SpeechSynthesisUtterance(t), vs = ss.getVoices();
+      u.rate = .88; u.pitch = 1.2;
+      const v = vs.find(v => /^en[-_](US|GB)/i.test(v.lang) && /(samantha|karen|google us english|zira|female)/i.test(v.name)) || vs.find(v => /^en/i.test(v.lang));
+      if (v) u.voice = v;
+      u.onend = done; u.onerror = done;
+      ss.speak(u);
+    } catch (e) { done(); }
+  });
+}
+
+/* ---------- art ---------- */
+const TOP = [
+  { n: 'pepperoni', p: 'pepperoni', d: '<circle r="7.5" fill="#c8372d" stroke="#8e2119" stroke-width="1.4"/><circle cx="-2.5" cy="-2" r="1.2" fill="#8e2119"/><circle cx="2.5" cy="1" r="1.2" fill="#8e2119"/><circle cx="-1" cy="3.5" r="1" fill="#8e2119"/>' },
+  { n: 'mushroom', p: 'mushrooms', d: '<rect x="-2.6" y="0" width="5.2" height="7" rx="2" fill="#efe2d0" stroke="#8a6f5a" stroke-width="1.3"/><path d="M-8,1.5 Q-8,-8 0,-8 Q8,-8 8,1.5 Z" fill="#f6ecdf" stroke="#8a6f5a" stroke-width="1.4" stroke-linejoin="round"/>' },
+  { n: 'olive', p: 'olives', d: '<circle r="5.5" fill="#3a3a4a" stroke="#1f1f2b" stroke-width="1.2"/><circle r="2.1" fill="#c7442f"/>' },
+  { n: 'green pepper', p: 'green peppers', d: '<path d="M-8,3 Q0,-10 8,3" fill="none" stroke="#2f8f3e" stroke-width="4.6" stroke-linecap="round"/><path d="M-8,3 Q0,-10 8,3" fill="none" stroke="#5fd06b" stroke-width="2" stroke-linecap="round"/>' },
+  { n: 'pineapple', p: 'pineapple', d: '<path d="M-7,-4 L6,-7 L8,4 L-5,7 Z" fill="#ffd23f" stroke="#d9971a" stroke-width="1.4" stroke-linejoin="round"/><path d="M-3,-2 L3,-3" stroke="#fff0a8" stroke-width="1.4" stroke-linecap="round"/>' },
+  { n: 'basil leaf', p: 'basil leaves', d: '<path d="M0,-8.5 Q9,-2 0,8.5 Q-9,-2 0,-8.5Z" fill="#4cb050" stroke="#2d7a38" stroke-width="1.4" stroke-linejoin="round"/><path d="M0,-6 L0,6" stroke="#2d7a38" stroke-width="1.2"/>' }
+];
+const tname = (t, n) => n === 1 ? TOP[t].n : TOP[t].p;
+const topIcon = (i, size = 24) => `<svg viewBox="-12 -12 24 24" width="${size}" height="${size}">${TOP[i].d}</svg>`;
+const bowlIcon = i => `<svg viewBox="-20 -20 40 40"><g transform="translate(-8 -6) scale(1.25)">${TOP[i].d}</g><g transform="translate(9 -9) rotate(40) scale(1.1)">${TOP[i].d}</g><g transform="translate(5 9) rotate(-30) scale(1.2)">${TOP[i].d}</g></svg>`;
+
+const CUST = [
+  { id: 'diya', nm: 'Dee-a', col: '#9a5ce0', back: '', front: '<path d="M100,42 C86,20 112,10 122,24 C128,34 116,40 110,34" fill="none" stroke="#3b2146" stroke-width="6" stroke-linecap="round"/>' },
+  { id: 'rohini', nm: 'Roe-hee-nee', col: '#ff8fc2', back: '', front: '<g transform="translate(138 48) rotate(20)"><path d="M0,0 L-26,-16 L-26,16 Z M0,0 L26,-16 L26,16 Z" fill="#ffd23f" stroke="#3b2146" stroke-width="5" stroke-linejoin="round"/><circle r="8" fill="#ffd23f" stroke="#3b2146" stroke-width="5"/></g>' },
+  { id: 'bear', nm: 'Bear', col: '#b5784a', back: '<circle cx="48" cy="48" r="24" fill="#b5784a" stroke="#3b2146" stroke-width="5"/><circle cx="152" cy="48" r="24" fill="#b5784a" stroke="#3b2146" stroke-width="5"/><circle cx="48" cy="48" r="11" fill="#e0b08a"/><circle cx="152" cy="48" r="11" fill="#e0b08a"/>', front: '' },
+  { id: 'bunny', nm: 'Bunny', col: '#f1e8f5', back: '<ellipse cx="68" cy="26" rx="17" ry="42" fill="#f1e8f5" stroke="#3b2146" stroke-width="5"/><ellipse cx="132" cy="26" rx="17" ry="42" fill="#f1e8f5" stroke="#3b2146" stroke-width="5"/><ellipse cx="68" cy="28" rx="7" ry="28" fill="#ffb3cf"/><ellipse cx="132" cy="28" rx="7" ry="28" fill="#ffb3cf"/>', front: '' },
+  { id: 'frog', nm: 'Frog', col: '#6fcf5a', back: '<circle cx="62" cy="46" r="22" fill="#6fcf5a" stroke="#3b2146" stroke-width="5"/><circle cx="138" cy="46" r="22" fill="#6fcf5a" stroke="#3b2146" stroke-width="5"/>', front: '' }
+];
+function custSVG(c) {
+  return `<svg class="face" viewBox="0 0 200 200">${c.back}
+    <circle cx="100" cy="104" r="68" fill="${c.col}" stroke="#3b2146" stroke-width="6"/>
+    <ellipse cx="62" cy="116" rx="11" ry="7" fill="#ff7aa2" opacity=".5"/><ellipse cx="138" cy="116" rx="11" ry="7" fill="#ff7aa2" opacity=".5"/>
+    <circle cx="78" cy="94" r="8" fill="#3b2146"/><circle cx="122" cy="94" r="8" fill="#3b2146"/>
+    <circle cx="81" cy="91" r="2.6" fill="#fff"/><circle cx="125" cy="91" r="2.6" fill="#fff"/>
+    <path class="smile" d="M82,116 Q100,136 118,116" fill="none" stroke="#3b2146" stroke-width="6" stroke-linecap="round"/>
+    <g class="mouth-open"><ellipse cx="100" cy="124" rx="17" ry="15" fill="#7a1f3a" stroke="#3b2146" stroke-width="5"/><ellipse cx="100" cy="132" rx="9" ry="5" fill="#ff7aa2"/></g>
+    ${c.front}</svg>`;
+}
+
+/* pizza drawn in a -100..100 box */
+const CHEESE = (() => { let d = ''; for (let i = 0; i < 48; i++) { const a = i / 48 * Math.PI * 2, r = 73 + 3.5 * Math.sin(i * 1.9) + 2 * Math.cos(i * 3.7); d += (i ? 'L' : 'M') + (Math.cos(a) * r).toFixed(1) + ',' + (Math.sin(a) * r).toFixed(1); } return d + 'Z'; })();
+function pizzaBase(raw) {
+  return `<circle class="crust" r="94" fill="${raw ? '#f2c47c' : '#e3a04f'}" stroke="#3b2146" stroke-width="5"/><circle r="81" fill="#d6342a"/><path d="${CHEESE}" fill="#ffd54a"/>` +
+    '<g fill="#ffe58a"><ellipse cx="-30" cy="-22" rx="14" ry="8"/><ellipse cx="26" cy="30" rx="16" ry="9"/><ellipse cx="34" cy="-34" rx="9" ry="6"/></g>';
+}
+const topG = (t, x, y, s = 1.5) => `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rnd(0, 360).toFixed(0)}) scale(${s})">${TOP[t].d}</g>`;
+const pizzaSVG = (tops, raw) => `<svg viewBox="-100 -100 200 200">${pizzaBase(raw)}${tops.map(p => topG(p.t, p.x, p.y)).join('')}</svg>`;
+function scatter(n, R = 60, md = 30) {
+  const pts = []; let tries = 0;
+  while (pts.length < n && tries < 4000) {
+    tries++; if (tries % 500 === 0) md *= .9;
+    const a = rnd(0, Math.PI * 2), r = Math.sqrt(Math.random()) * R, p = { x: Math.cos(a) * r, y: Math.sin(a) * r };
+    if (pts.every(q => Math.hypot(q.x - p.x, q.y - p.y) >= md)) pts.push(p);
+  }
+  return pts;
+}
+const wedgePath = (a0, a1, R) => `M0,0 L${(R * Math.cos(a0)).toFixed(2)},${(R * Math.sin(a0)).toFixed(2)} A${R},${R} 0 0 1 ${(R * Math.cos(a1)).toFixed(2)},${(R * Math.sin(a1)).toFixed(2)}Z`;
+/* a pizza made of n separate wedges (class "w"), toppings chosen from types */
+function wedgesSVG(n, types) {
+  let s = '<circle class="ring" r="94" fill="none" stroke="#3b2146" stroke-width="5"/>';
+  const step = Math.PI * 2 / n;
+  for (let k = 0; k < n; k++) {
+    const a0 = -Math.PI / 2 + k * step, a1 = a0 + step, am = a0 + step / 2;
+    const spots = [[am, 56]]; if (n <= 6) spots.push([am + step * .2, 28]); if (n <= 4) spots.push([am - step * .25, 70]);
+    s += `<g class="w" style="--gx:${(Math.cos(am) * 6).toFixed(1)}px;--gy:${(Math.sin(am) * 6).toFixed(1)}px">` +
+      `<path d="${wedgePath(a0, a1, 94)}" fill="#e3a04f"/><path d="${wedgePath(a0, a1, 81)}" fill="#d6342a"/><path d="${wedgePath(a0, a1, 74)}" fill="#ffd54a"/>` +
+      spots.map(([a, r]) => topG(pick(types), Math.cos(a) * r, Math.sin(a) * r)).join('') +
+      `<path class="wo" d="${wedgePath(a0, a1, 94)}" fill="none" stroke="#3b2146" stroke-width="4" stroke-linejoin="round"/></g>`;
+  }
+  return s;
+}
+const SLICE = '<svg viewBox="0 0 100 100"><path d="M10,24 Q50,2 90,24 L50,96 Z" fill="#e3a04f" stroke="#3b2146" stroke-width="5" stroke-linejoin="round"/><path d="M17,31 Q50,14 83,31 L50,88 Z" fill="#ffd54a"/><circle cx="41" cy="42" r="8" fill="#c8372d" stroke="#8e2119" stroke-width="2"/><circle cx="60" cy="56" r="7" fill="#c8372d" stroke="#8e2119" stroke-width="2"/><circle cx="48" cy="72" r="4" fill="#c8372d"/></svg>';
+const SLICE_GONE = '<svg viewBox="0 0 100 100"><path d="M10,24 Q50,2 90,24 L50,96 Z" fill="rgba(255,253,247,.3)" stroke="#3b2146" stroke-opacity=".45" stroke-width="4" stroke-dasharray="8 7" stroke-linejoin="round"/></svg>';
+const DOUGH = '<svg viewBox="0 0 100 100"><ellipse cx="50" cy="94" rx="38" ry="5" fill="rgba(59,33,70,.18)"/><circle cx="50" cy="52" r="44" fill="#f6d38e" stroke="#3b2146" stroke-width="4" vector-effect="non-scaling-stroke"/><ellipse cx="36" cy="36" rx="14" ry="9" fill="#fff3d0" transform="rotate(-30 36 36)"/><circle cx="62" cy="68" r="2.5" fill="#e0b070"/><circle cx="71" cy="57" r="2" fill="#e0b070"/></svg>';
+const HEART = '<svg viewBox="0 0 24 24"><path d="M12 21 C3 14 2 9 5 6 C8 3 11 5 12 8 C13 5 16 3 19 6 C22 9 21 14 12 21Z" fill="#ff5c8a" stroke="#3b2146" stroke-width="2" stroke-linejoin="round"/></svg>';
+const STAR = '<svg viewBox="0 0 24 24"><path d="M12 2 L14.8 8.6 L22 9.3 L16.6 14 L18.2 21 L12 17.3 L5.8 21 L7.4 14 L2 9.3 L9.2 8.6 Z" fill="#ffcf3d" stroke="#3b2146" stroke-width="1.8" stroke-linejoin="round"/></svg>';
+const STARSVG = '<svg class="st" viewBox="0 0 24 24"><path d="M12 2 L14.8 8.6 L22 9.3 L16.6 14 L18.2 21 L12 17.3 L5.8 21 L7.4 14 L2 9.3 L9.2 8.6 Z"/></svg>';
+const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="#fffdf7" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 H19 M13 6 L19 12 L13 18"/></svg>';
+const REPLAY = '<svg viewBox="0 0 24 24" fill="none" stroke="#fffdf7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12 A8 8 0 1 1 16.5 5.4"/><path d="M20 3.5 V8.5 H15"/></svg>';
+const ICON = [
+  '<svg viewBox="0 0 24 24"><rect x="1.5" y="6" width="21" height="12" rx="3" fill="#e5483b" stroke="#3b2146" stroke-width="2"/><text x="12" y="15.4" text-anchor="middle" class="ic" font-size="7.5" fill="#fffdf7">ABC</text></svg>',
+  '<svg viewBox="0 0 24 24"><g fill="#f6d38e" stroke="#3b2146" stroke-width="1.8"><circle cx="4.5" cy="17" r="2.8"/><circle cx="11" cy="15.3" r="4.5"/><circle cx="18.3" cy="13.5" r="5.4"/></g></svg>',
+  '<svg viewBox="0 0 24 24"><text x="12" y="18" text-anchor="middle" class="ic" font-size="14" fill="#3b2146">Aa</text></svg>',
+  '<svg viewBox="0 0 24 24"><rect x="5" y="2.5" width="14" height="19" rx="2" fill="#fffdf7" stroke="#3b2146" stroke-width="2"/><text x="10" y="14" text-anchor="middle" class="ic" font-size="9" fill="#3b2146">3</text><circle cx="15" cy="10.8" r="2.4" fill="#c8372d"/><path d="M8 17.5 H16" stroke="#3b2146" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  '<svg viewBox="0 0 24 24"><g fill="#ffd54a" stroke="#3b2146" stroke-width="1.6"><circle cx="6.5" cy="12" r="5.5"/><circle cx="17.5" cy="12" r="5.5"/></g><circle cx="6.5" cy="12" r="1.6" fill="#c8372d"/><g fill="#c8372d"><circle cx="15.7" cy="10.2" r="1.4"/><circle cx="19.3" cy="10.2" r="1.4"/><circle cx="15.7" cy="13.8" r="1.4"/><circle cx="19.3" cy="13.8" r="1.4"/></g></svg>',
+  '<svg viewBox="0 0 24 24"><g fill="#fffdf7" stroke="#3b2146" stroke-width="1.6"><ellipse cx="6.5" cy="17" rx="5" ry="3"/><ellipse cx="17.5" cy="17" rx="5" ry="3"/></g><g fill="#ffd54a" stroke="#3b2146" stroke-width="1.4" stroke-linejoin="round"><path d="M4 5 L9 5 L6.5 14Z"/><path d="M15 5 L20 5 L17.5 14Z"/></g></svg>',
+  '<svg viewBox="0 0 24 24"><path d="M3 6 Q12 1 21 6 L12 22 Z" fill="#ffd54a" stroke="#3b2146" stroke-width="2" stroke-linejoin="round"/><circle cx="10" cy="9" r="1.8" fill="#c8372d"/><circle cx="13.5" cy="13" r="1.6" fill="#c8372d"/><circle cx="20" cy="4.5" r="3" fill="#fffdf7"/></svg>',
+  '<svg viewBox="0 0 24 24"><path d="M2.5 11 L12 3 L21.5 11 Z" fill="#e5483b" stroke="#3b2146" stroke-width="2" stroke-linejoin="round"/><rect x="5" y="10.5" width="14" height="10.5" fill="#6fb7ff" stroke="#3b2146" stroke-width="2"/><text x="12" y="19.3" text-anchor="middle" class="ic" font-size="8.5" fill="#fffdf7">7</text></svg>',
+  '<svg viewBox="0 0 24 24"><path d="M12 21 C3 14 2 9 5 6 C8 3 11 5 12 8 C13 5 16 3 19 6 C22 9 21 14 12 21Z" fill="#ff5c8a" stroke="#3b2146" stroke-width="2" stroke-linejoin="round"/></svg>'
+];
+
+/* ---------- stage, effects ---------- */
+const stage = $('#stage'), lv = $('#lv'), dock = $('#dock'), fxEl = $('#fx'), stepsEl = $('#steps'), starRow = $('#starRow'),
+  undoBtn = $('#undo'), checkBtn = $('#check'), doneEl = $('#done'), nextBtn = $('#next');
+function rel(e) { const r = e.getBoundingClientRect(), s = stage.getBoundingClientRect(); return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height }; }
+const toSvg = (svg, e) => { const r = svg.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * 200 - 100, y: (e.clientY - r.top) / r.height * 200 - 100 }; };
+function flipMove(e, parent) {
+  const a = e.getBoundingClientRect(); parent.append(e); const b = e.getBoundingClientRect();
+  e.animate([{ transform: `translate(${a.left - b.left}px,${a.top - b.top}px)` }, { transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.3,1.3,.5,1)' });
+}
+function fly(html, a, b, ms = 650, arc = -50) {
+  const d = el('div', 'fx', html); d.style.width = a.w + 'px'; d.style.height = a.h + 'px'; d.style.transformOrigin = '0 0'; fxEl.appendChild(d);
+  const sx = b.w / a.w, sy = b.h / a.h;
+  const an = d.animate([
+    { transform: `translate(${a.x}px,${a.y}px)` },
+    { transform: `translate(${(a.x + b.x) / 2}px,${(a.y + b.y) / 2 + arc}px) scale(${(1 + sx) / 2},${(1 + sy) / 2})` },
+    { transform: `translate(${b.x}px,${b.y}px) scale(${sx},${sy})` }
+  ], { duration: ms, easing: 'ease-in-out', fill: 'forwards' });
+  return new Promise(r => { an.onfinish = () => { d.remove(); r(); }; });
+}
+function fxPart(html, x, y, w, dx, dy, ms, rot = 0) {
+  const d = el('div', 'fx', html); d.style.width = d.style.height = w + 'px'; fxEl.appendChild(d);
+  const bx = x - w / 2, by = y - w / 2;
+  const a = d.animate([
+    { transform: `translate(${bx}px,${by}px) scale(.3)`, opacity: 1 },
+    { transform: `translate(${bx + dx * .5}px,${by + dy * .5}px) scale(1) rotate(${rot / 2}deg)`, opacity: 1, offset: .4 },
+    { transform: `translate(${bx + dx}px,${by + dy}px) scale(.8) rotate(${rot}deg)`, opacity: 0 }
+  ], { duration: ms, easing: 'ease-out' });
+  a.onfinish = () => d.remove();
+}
+function burst(x, y, n = 10) { for (let i = 0; i < n; i++) { const a = rnd(0, 6.28), r = rnd(50, 140); fxPart(STAR, x, y, rnd(18, 34), Math.cos(a) * r, Math.sin(a) * r, rnd(700, 1100), rnd(-90, 90)); } }
+const burstOn = e => { const c = rel(e); burst(c.x + c.w / 2, c.y + c.h / 2, 12); };
+function hearts(x, y, n = 3) { for (let i = 0; i < n; i++) fxPart(HEART, x + rnd(-30, 30), y, rnd(20, 34), rnd(-40, 40), rnd(-130, -70), 1000); }
+function confetti() {
+  const w = stage.clientWidth, h = stage.clientHeight, cols = ['#ff5c8a', '#ffcf3d', '#4cc36b', '#6fb7ff', '#b47cff'];
+  for (let i = 0; i < 34; i++) fxPart(`<svg viewBox="0 0 10 10"><rect width="10" height="10" rx="2" fill="${pick(cols)}"/></svg>`, rnd(0, w), -10, rnd(10, 18), rnd(-60, 60), rnd(220, h), rnd(1400, 2200), rnd(-360, 360));
+}
+async function feed(face, a) {
+  const m = rel(face), s = m.w * .3;
+  await fly(SLICE, a, { x: m.x + m.w / 2 - s / 2, y: m.y + m.h * .62 - s / 2, w: s, h: s }, 650, -60);
+  S.chomp(); face.classList.add('chew'); setTimeout(() => face.classList.remove('chew'), 800);
+  hearts(m.x + m.w / 2, m.y + m.h * .35, 3);
+}
+
+/* ---------- levels ---------- */
+const LV = []; let cur = -1, run = 0, relayout = null;
+const alive = t => t === run;
+function layout() {
+  const w = stage.clientWidth, h = stage.clientHeight; stage._d = { w, h };
+  stage.style.setProperty('--W', w + 'px'); stage.style.setProperty('--H', h + 'px');
+  if (relayout) relayout();
+}
+function setStars(n) { starRow.innerHTML = STARSVG.repeat(n); }
+function earn(k, ok) {
+  const s = starRow.children[k]; if (!s || s.classList.contains('gold') || s.classList.contains('miss')) return;
+  s.classList.add(ok ? 'gold' : 'miss'); if (ok) S.star();
+}
+function clearAll() {
+  lv.innerHTML = ''; lv.className = ''; lv.removeAttribute('style'); dock.innerHTML = ''; fxEl.innerHTML = '';
+  undoBtn.hidden = checkBtn.hidden = true; undoBtn.onclick = checkBtn.onclick = null; relayout = null; doneEl.hidden = true;
+  try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {}
+}
+function renderSteps() { [...stepsEl.children].forEach((b, i) => { b.classList.toggle('on', i === cur); b.classList.toggle('done', i < cur); }); }
+function startLevel(i) { run++; cur = i; clearAll(); renderSteps(); setStars(LV[i].n); layout(); LV[i].start(run); }
+function levelDone(tok, last) {
+  if (!alive(tok)) return;
+  dock.innerHTML = ''; undoBtn.hidden = checkBtn.hidden = true;
+  const n = LV[cur].n, big = doneEl.querySelector('.big');
+  big.innerHTML = n ? [...starRow.children].map(s => STARSVG.replace('class="st"', `class="st ${s.classList.contains('gold') ? 'gold' : 'miss'}"`)).join('')
+    : `<div class="donePz">${pizzaSVG(scatter(7, 58, 32).map(p => ({ ...p, t: Math.floor(rnd(0, 6)) })))}</div>`;
+  nextBtn.innerHTML = last ? REPLAY : ARROW;
+  nextBtn.setAttribute('aria-label', last ? 'Play again' : 'Next level');
+  nextBtn.onclick = () => { ac(); S.pop(); startLevel(last ? 0 : cur + 1); };
+  doneEl.hidden = false; S.yay(); confetti();
+  const got = starRow.querySelectorAll('.gold').length;
+  say(last ? 'Bye-bye, pizza shop! See you next time!' : n && got === n ? 'Wow! All the stars!' : 'Great job!');
+}
+/* ---------- Level 1: shop sign (letter matching, copying a word) ---------- */
+const SIGN_W = [
+  { w: 'PIZZA', ghost: true, extra: '', intro: 'Oh no! The letters fell off the sign. Put them back!', end: 'Pizza!' },
+  { w: 'DIYA', ghost: true, extra: 'M', intro: 'Now spell the name of the shop.', end: "Dee-a! It's Dee-a's pizza shop!" },
+  { w: 'OPEN', ghost: false, extra: 'S', intro: 'Look at the white card. Copy the word to open the shop.', end: 'Open! The pizza shop is open!' }
+];
+LV.push({ icon: ICON[0], n: 0, start(tok) {
+  let r = 0;
+  const size = () => { const { w, h } = stage._d, n = SIGN_W[r].w.length; lv.style.setProperty('--t', Math.min(w * .86 / (n * 1.15 + .6), h * .19) + 'px'); };
+  relayout = size;
+  function snap(t, slot, sign) {
+    const a = t.getBoundingClientRect(); slot.textContent = ''; slot.append(t); t.style.transform = '';
+    const b = t.getBoundingClientRect();
+    t.animate([{ transform: `translate(${a.left - b.left}px,${a.top - b.top}px) scale(${(a.width / b.width).toFixed(3)})` }, { transform: 'none' }], { duration: 240, easing: 'ease-out' });
+    S.place();
+    if (![...sign.children].some(s => !s.querySelector('.tile'))) finish(sign);
+  }
+  function back(t) {
+    const from = t.style.transform; t.style.transform = '';
+    if (from) t.animate([{ transform: from }, { transform: 'none' }], { duration: 260, easing: 'ease-out' });
+  }
+  function drag(t, sign) {
+    let sx = 0, sy = 0, on = false;
+    t.addEventListener('pointerdown', e => {
+      if (on || t.closest('.slot') || lv.dataset.lock) return;
+      on = true; ac(); sx = e.clientX; sy = e.clientY; t.classList.add('drag');
+      try { t.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault(); S.pop(); say(t.dataset.ch + '.');
+    });
+    t.addEventListener('pointermove', e => { if (on) t.style.transform = `translate(${e.clientX - sx}px,${e.clientY - sy}px) scale(1.12)`; });
+    const end = e => {
+      if (!on) return; on = false; t.classList.remove('drag');
+      const open = [...sign.children].filter(s => !s.querySelector('.tile'));
+      const near = open.map(s => { const q = s.getBoundingClientRect(); return { s, d: Math.hypot(e.clientX - (q.left + q.width / 2), e.clientY - (q.top + q.height / 2)), lim: q.width * .9 }; })
+        .filter(o => o.d < o.lim).sort((a, b) => a.d - b.d);
+      const good = near.find(o => o.s.dataset.ch === t.dataset.ch);
+      if (good) snap(t, good.s, sign); else { if (near.length) S.oops(); back(t); }
+    };
+    t.addEventListener('pointerup', end); t.addEventListener('pointercancel', end);
+  }
+  async function finish(sign) {
+    lv.dataset.lock = 1; S.ding(); sign.classList.add('lit'); burstOn(sign);
+    const R = SIGN_W[r];
+    await say(R.w.split('').join(', ') + '.'); if (!alive(tok)) return;
+    await say(R.end); if (!alive(tok)) return;
+    await wait(500); if (!alive(tok)) return;
+    r++; r < SIGN_W.length ? round() : levelDone(tok);
+  }
+  async function round(first) {
+    const R = SIGN_W[r]; lv.innerHTML = ''; delete lv.dataset.lock; size();
+    if (!R.ghost) lv.append(el('div', 'model', R.w.split('').map(c => `<span>${c}</span>`).join('')));
+    const sign = el('div', 'sign');
+    R.w.split('').forEach(c => { const s = el('div', 'slot', R.ghost ? c : ''); s.dataset.ch = c; sign.append(s); });
+    const tiles = el('div', 'tiles'), all = R.w + R.extra;
+    let order; do { order = shuffle(all.split('')); } while (order.join('') === all);
+    order.forEach(c => { const t = el('div', 'tile', c); t.dataset.ch = c; drag(t, sign); tiles.append(t); });
+    lv.append(sign, tiles);
+    if (first) { await say('Welcome to the pizza shop!'); if (!alive(tok)) return; }
+    await say(R.intro);
+  }
+  round(true);
+} });
+
+/* ---------- Level 2: dough balls, smallest to biggest ---------- */
+const LEGEND = '<svg viewBox="0 0 140 34"><circle cx="12" cy="20" r="7" fill="#f6d38e" stroke="#3b2146" stroke-width="3"/><path d="M28 20 H104 M94 11 L104 20 L94 29" fill="none" stroke="#3b2146" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="124" cy="17" r="14" fill="#f6d38e" stroke="#3b2146" stroke-width="3"/></svg>';
+LV.push({ icon: ICON[1], n: 5, start(tok) {
+  const NB = [3, 3, 4, 4, 5]; let r = 0;
+  const size = () => { const { w, h } = stage._d, n = NB[r]; lv.style.setProperty('--bs', Math.min(w * .86 / (n * 1.12 + .3), h * .3) + 'px'); };
+  relayout = size;
+  async function round() {
+    if (!alive(tok)) return;
+    lv.innerHTML = ''; size(); const n = NB[r];
+    const tray = el('div', 'tray'), spots = [];
+    for (let i = 0; i < n; i++) { const s = el('div', 'spot'); tray.append(s); spots.push(s); }
+    const balls = el('div', 'balls');
+    const ks = Array.from({ length: n }, (_, i) => .4 + .6 * i / (n - 1));
+    let ord; do { ord = shuffle(ks.map((k, i) => i)); } while (ord.every((v, i) => v === i));
+    let next = 0, miss = false, busy = false;
+    ord.forEach(i => {
+      const b = el('button', 'ball', DOUGH); b.style.setProperty('--k', ks[i]); b.dataset.i = i; b.setAttribute('aria-label', 'Dough ball');
+      b.addEventListener('click', async () => {
+        if (busy || b.closest('.spot')) return; ac();
+        balls.querySelectorAll('.glow').forEach(x => x.classList.remove('glow'));
+        if (+b.dataset.i === next) {
+          flipMove(b, spots[next]); next++; S.place();
+          if (next === n) {
+            busy = true; earn(r, !miss); S.ding(); burstOn(tray);
+            await say('Smallest to biggest. Great!'); if (!alive(tok)) return;
+            await wait(400); if (!alive(tok)) return;
+            r++; r < NB.length ? round() : levelDone(tok);
+          }
+        } else {
+          miss = true; S.oops(); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
+          const g = [...balls.children].find(x => +x.dataset.i === next);
+          say(next ? 'Oops. Find the smallest one left.' : 'Oops. Find the smallest one.');
+          setTimeout(() => { if (g && !g.closest('.spot')) g.classList.add('glow'); }, 700);
+        }
+      });
+      balls.append(b);
+    });
+    lv.append(tray, el('div', 'legend', LEGEND), balls);
+    await say(r === 0 ? 'Roll the dough! Put the dough balls in a line, from smallest to biggest. Tap the smallest one first.' : 'Smallest to biggest!');
+  }
+  round();
+} });
+
+/* ---------- Level 3: big and little letters ---------- */
+LV.push({ icon: ICON[2], n: 5, start(tok) {
+  const RD = [['O', 'o', 'c', 'a'], ['S', 's', 'z', 'c'], ['A', 'a', 'o', 'e'], ['D', 'd', 'b', 'a'], ['B', 'b', 'd', 'h']];
+  let r = 0;
+  async function round() {
+    if (!alive(tok)) return;
+    lv.innerHTML = ''; dock.innerHTML = '';
+    const [U, l, ...ds] = RD[r];
+    const pz = el('div', 'l3pz', `<svg viewBox="-100 -100 200 200">${pizzaBase()}<text class="bigL" x="-36" y="36" text-anchor="middle">${U}</text><circle class="lspot" cx="52" cy="22" r="30" fill="rgba(255,253,247,.6)" stroke="#3b2146" stroke-width="3" stroke-dasharray="7 6"/><text class="litL" x="52" y="44" text-anchor="middle" opacity="0">${l}</text></svg>`);
+    lv.append(pz);
+    let done = false;
+    shuffle([l, ...ds]).forEach(c => {
+      const b = el('button', 'choice', c); b.dataset.ch = c; b.setAttribute('aria-label', 'little ' + c);
+      b.addEventListener('click', async () => {
+        if (done) return; done = true; ac();
+        const good = [...dock.children].find(x => x.dataset.ch === l);
+        if (c === l) { S.ding(); earn(r, true); }
+        else {
+          S.oops(); b.classList.add('shake'); earn(r, false);
+          await say(`That is little ${c.toUpperCase()}.`); if (!alive(tok)) return;
+          good.classList.add('glow');
+          await say(`This is little ${U}.`); if (!alive(tok)) return;
+        }
+        good.classList.remove('glow'); const a = rel(good); good.style.visibility = 'hidden';
+        const spot = pz.querySelector('.lspot');
+        await fly(`<div class="choice">${l}</div>`, a, rel(spot), 600); if (!alive(tok)) return;
+        pz.querySelector('.litL').setAttribute('opacity', 1); spot.setAttribute('stroke-opacity', 0); S.place(); burstOn(pz);
+        await say(`Big ${U}, little ${U}!`); if (!alive(tok)) return;
+        await wait(500); if (!alive(tok)) return;
+        r++; r < RD.length ? round() : levelDone(tok);
+      });
+      dock.append(b);
+    });
+    if (r === 0) { await say('Every big letter has a little letter.'); if (!alive(tok)) return; }
+    await say(`This is big ${U}. Find little ${U}.`);
+  }
+  round();
+} });
+/* ---------- Level 4: order tickets (count out the right number) ---------- */
+LV.push({ icon: ICON[3], n: 5, start(tok) {
+  const RD = [{ o: [[0, 3]], dots: 1 }, { o: [[2, 5]], dots: 1 }, { o: [[1, 4]], dots: 1 }, { o: [[0, 2], [5, 3]], dots: 0 }, { o: [[2, 4], [4, 2]], dots: 0 }];
+  let r = 0;
+  const orderText = o => o.map(([t, n]) => `${n} ${tname(t, n)}`).join(' and ');
+  async function round() {
+    if (!alive(tok)) return;
+    lv.innerHTML = ''; dock.innerHTML = ''; undoBtn.hidden = checkBtn.hidden = true;
+    const R = RD[r], types = R.o.map(x => x[0]); let sel = -1, placed = [], tries = 0, busy = false;
+    const row = el('div', 'row l4');
+    const tk = el('div', 'ticket', '<div class="clip"></div>' + R.o.map(([t, n]) =>
+      `<div class="line"><span class="num">${n}</span>${topIcon(t, 60)}${R.dots ? `<span class="dots">${'<i></i>'.repeat(n)}</span>` : ''}</div>`).join(''));
+    const pw = el('div', 'l4pz', `<svg viewBox="-100 -100 200 200">${pizzaBase(true)}<g class="tops"></g><g class="badges"></g></svg>`);
+    row.append(tk, pw); lv.append(row);
+    const svg = pw.firstElementChild, topsG = svg.querySelector('.tops'), badG = svg.querySelector('.badges');
+    const bowls = shuffle([...types, ...shuffle([0, 1, 2, 3, 4, 5].filter(t => !types.includes(t))).slice(0, 3 - types.length)]);
+    bowls.forEach(t => {
+      const b = el('button', 'bowl', bowlIcon(t)); b.setAttribute('aria-label', TOP[t].p);
+      b.addEventListener('click', () => { if (busy) return; ac(); sel = t; S.pop(); [...dock.children].forEach(c => c.classList.toggle('sel', c === b)); say(cap(TOP[t].p)); });
+      dock.append(b);
+    });
+    svg.addEventListener('pointerdown', e => {
+      if (busy) return; ac(); e.preventDefault();
+      if (sel < 0) { [...dock.children].forEach(c => { c.classList.add('glow'); setTimeout(() => c.classList.remove('glow'), 1600); }); say('Pick a topping first.'); return; }
+      const p = toSvg(svg, e); if (Math.hypot(p.x, p.y) > 68 || placed.length >= 20) return;
+      const g = svgEl('g', { transform: `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${rnd(0, 360).toFixed(0)}) scale(1.5)` }, topsG);
+      svgEl('g', { class: 'pop' }, g).innerHTML = TOP[sel].d;
+      placed.push({ t: sel, g, x: p.x, y: p.y }); S.place(); undoBtn.hidden = checkBtn.hidden = false;
+    });
+    undoBtn.onclick = () => { if (busy || !placed.length) return; placed.pop().g.remove(); S.pop(); if (!placed.length) undoBtn.hidden = checkBtn.hidden = true; };
+    checkBtn.onclick = async () => {
+      if (busy || !placed.length) return; busy = true; tries++; ac(); undoBtn.hidden = checkBtn.hidden = true;
+      const kinds = [...types, ...[...new Set(placed.map(p => p.t))].filter(t => !types.includes(t))];
+      for (const t of kinds) {
+        const mine = placed.filter(p => p.t === t); if (!mine.length) continue;
+        for (let i = 0; i < mine.length; i++) {
+          const p = mine[i], b = svgEl('g', { transform: `translate(${(p.x + 10).toFixed(1)} ${(p.y - 10).toFixed(1)})` }, badG);
+          const inner = svgEl('g', { class: 'pop' }, b);
+          svgEl('circle', { r: 10, fill: '#3b2146', stroke: '#fffdf7', 'stroke-width': 2 }, inner);
+          svgEl('text', { y: 4.6, 'text-anchor': 'middle', class: 'bnum' }, inner).textContent = i + 1;
+          S.count(i); await say(String(i + 1)); if (!alive(tok)) return;
+        }
+        await wait(300); if (!alive(tok)) return;
+      }
+      const bad = R.o.find(([t, n]) => placed.filter(p => p.t === t).length !== n);
+      const extra = kinds.find(t => !types.includes(t));
+      if (!bad && extra == null) {
+        earn(r, tries === 1); S.ding(); svg.querySelector('.crust').setAttribute('fill', '#e3a04f'); burstOn(pw);
+        await say(`${cap(orderText(R.o))}. Just right!`); if (!alive(tok)) return;
+        pw.classList.add('out'); S.whoosh(); await wait(800); if (!alive(tok)) return;
+        r++; r < RD.length ? round() : levelDone(tok);
+      } else {
+        S.oops(); earn(r, false);
+        if (bad) { const [t, n] = bad, have = placed.filter(p => p.t === t).length; await say(have ? `That's ${have}. The ticket says ${n} ${tname(t, n)}.` : `The ticket says ${n} ${tname(t, n)}.`); }
+        else await say(`The ticket has no ${TOP[extra].p}.`);
+        if (!alive(tok)) return;
+        badG.innerHTML = ''; busy = false; undoBtn.hidden = checkBtn.hidden = !placed.length;
+        say('Fix it, then tap the green check.');
+      }
+    };
+    await say(r === 0 ? `Order up! Look at the ticket. Make a pizza with ${orderText(R.o)}. Pick the topping, then tap the pizza.` : `Order up! ${cap(orderText(R.o))}, please.`);
+  }
+  round();
+} });
+
+/* ---------- Level 5: more or fewer ---------- */
+LV.push({ icon: ICON[4], n: 5, start(tok) {
+  const RD = [[2, 6, 'more', 0], [7, 4, 'more', 2], [3, 8, 'fewer', 1], [6, 5, 'more', 3], [4, 5, 'fewer', 5]];
+  let r = 0;
+  async function round() {
+    if (!alive(tok)) return;
+    lv.innerHTML = '';
+    const [a, b, q, t] = RD[r], ns = Math.random() < .5 ? [a, b] : [b, a];
+    const want = q === 'more' ? Math.max(a, b) : Math.min(a, b);
+    const row = el('div', 'row');
+    let done = false;
+    const pzs = ns.map(n => {
+      const w = el('button', 'l5pz', '<span class="cnt"></span>' + pizzaSVG(scatter(n, 60, 32).map(p => ({ ...p, t }))));
+      w.dataset.n = n; w.setAttribute('aria-label', 'Pizza'); row.append(w); return w;
+    });
+    lv.append(row);
+    pzs.forEach(w => w.addEventListener('click', async () => {
+      if (done) return; done = true; ac();
+      const good = pzs.find(x => +x.dataset.n === want), other = pzs.find(x => x !== good);
+      if (w === good) { S.ding(); earn(r, true); burstOn(good); }
+      else { S.oops(); w.classList.add('shake'); earn(r, false); good.classList.add('glow'); }
+      pzs.forEach(x => { x.querySelector('.cnt').textContent = x.dataset.n; x.classList.add('show'); });
+      await say(`${good.dataset.n} is ${q} than ${other.dataset.n}.`); if (!alive(tok)) return;
+      await wait(700); if (!alive(tok)) return;
+      r++; r < RD.length ? round() : levelDone(tok);
+    }));
+    if (r === 0) { await say('Two pizzas came out of the oven.'); if (!alive(tok)) return; }
+    if (r === 2) { await say('Fewer means not as many.'); if (!alive(tok)) return; }
+    await say(`Which pizza has ${q} ${TOP[t].p}?`);
+  }
+  round();
+} });
+
+/* ---------- Level 6: fair shares ---------- */
+LV.push({ icon: ICON[5], n: 4, start(tok) {
+  const RD = [[2, 4], [3, 6], [2, 6], [4, 8]]; let r = 0;
+  const size = () => { const { w, h } = stage._d, f = RD[r][0]; lv.style.setProperty('--fw', Math.min(w * .86 / f - w * .03, h * .23) + 'px'); };
+  relayout = size;
+  async function round() {
+    if (!alive(tok)) return;
+    lv.innerHTML = ''; size();
+    const [f, s] = RD[r]; let tries = 0, busy = false, flying = 0;
+    const table = el('div', 'table');
+    const fr = shuffle(CUST).slice(0, f).map(c => {
+      const col = el('div', 'friend'), face = el('div', 'cust', custSVG(c)), pl = el('button', 'plate');
+      pl.setAttribute('aria-label', 'Plate for ' + c.id); col.append(face, pl); table.append(col);
+      const o = { c, face, pl, n: 0 };
+      pl.addEventListener('click', e => { if (busy) return; ac(); const ps = e.target.closest('.ps'); ps ? takeBack(o, ps) : give(o); });
+      return o;
+    });
+    const pzw = el('div', 'l6pz cut', `<svg viewBox="-100 -100 200 200">${wedgesSVG(s, [0])}</svg>`);
+    lv.append(table, pzw);
+    const wedges = [...pzw.querySelectorAll('.w')];
+    const left = () => wedges.some(x => !x.classList.contains('gone'));
+    const maybeJudge = () => { if (!flying && !left() && !busy) judge(); };
+    async function give(o) {
+      const w = wedges.find(x => !x.classList.contains('gone')); if (!w) return;
+      w.classList.add('gone'); o.n++;
+      const ps = el('div', 'ps', SLICE); ps.style.visibility = 'hidden'; o.pl.append(ps); o.pl.classList.toggle('many', o.n > 6);
+      S.pop(); flying++;
+      await fly(SLICE, rel(w), rel(ps), 450, -40); flying--;
+      if (!alive(tok)) return;
+      ps.style.visibility = ''; S.place(); maybeJudge();
+    }
+    async function takeBack(o, ps) {
+      const w = wedges.filter(x => x.classList.contains('gone')).pop(); if (!w) return;
+      const a = rel(ps); ps.remove(); o.n--; o.pl.classList.toggle('many', o.n > 6); S.pop(); flying++;
+      await fly(SLICE, a, rel(w), 400, -30); flying--;
+      if (!alive(tok)) return;
+      w.classList.remove('gone');
+    }
+    async function judge() {
+      busy = true; const ns = fr.map(o => o.n);
+      if (ns.every(n => n === ns[0])) {
+        earn(r, tries === 0); S.ding();
+        await say(`Fair! Everyone gets ${ns[0]} slices.`); if (!alive(tok)) return;
+        for (const o of fr) {
+          o.face.classList.add('chew'); S.chomp(); const m = rel(o.face); hearts(m.x + m.w / 2, m.y + m.h * .3, 3);
+          setTimeout(() => o.face.classList.remove('chew'), 800); await wait(380); if (!alive(tok)) return;
+        }
+        await wait(700); if (!alive(tok)) return;
+        r++; r < RD.length ? round() : levelDone(tok);
+      } else {
+        tries++; S.oops(); earn(r, false);
+        const mx = fr.reduce((a, b) => b.n > a.n ? b : a), mn = fr.reduce((a, b) => b.n < a.n ? b : a);
+        mx.pl.classList.add('shake');
+        await say(`Uh oh, that's not fair. ${mx.c.nm} has ${mx.n}, and ${mn.c.nm} has ${mn.n}.`); if (!alive(tok)) return;
+        await say("Let's try again."); if (!alive(tok)) return;
+        mx.pl.classList.remove('shake');
+        fr.forEach(o => { o.pl.innerHTML = ''; o.n = 0; o.pl.classList.remove('many'); });
+        wedges.forEach(w => w.classList.remove('gone')); S.whoosh(); busy = false;
+      }
+    }
+    await say(r === 0 ? 'Share the pizza with your friends. Tap a plate to give a slice. Make it fair, so everyone gets the same.' : `${f} friends. Share it so it is fair!`);
+  }
+  round();
+} });
+/* ---------- Level 7: slices left (take away) ---------- */
+LV.push({ icon: ICON[6], n: 5, start(tok) {
+  const RD = [[4, 1], [5, 3], [6, 2], [7, 1], [8, 3]]; let r = 0;
+  const size = () => { const { w, h } = stage._d, N = RD[r][0]; lv.style.setProperty('--sw', Math.min(w * .86 / (N * 1.08 + .45), h * .28) + 'px'); };
+  relayout = size;
+  async function round() {
+    if (!alive(tok)) return;
+    lv.innerHTML = ''; dock.innerHTML = ''; size();
+    const [N, k] = RD[r], ans = N - k, c = CUST[(r + 2) % CUST.length];
+    const face = el('div', 'cust l7c', custSVG(c)), board = el('div', 'board'), sl = [];
+    for (let i = 0; i < N; i++) { const s = el('div', 'sl', SLICE); board.append(s); sl.push(s); }
+    lv.append(face, board);
+    await say(`${c.nm} has ${N} slices of pizza.`); if (!alive(tok)) return;
+    await say(`${c.nm} eats ${k}.`); if (!alive(tok)) return;
+    for (let j = 0; j < k; j++) {
+      const s = sl[N - 1 - j], a = rel(s); s.innerHTML = SLICE_GONE; s.classList.add('eaten');
+      await feed(face, a); if (!alive(tok)) return; await wait(250); if (!alive(tok)) return;
+    }
+    const opts = new Set([ans]);
+    [N, ans + 1, ans - 1, ans + 2].forEach(v => { if (opts.size < 3 && v >= 1 && v <= 9) opts.add(v); });
+    let done = false;
+    shuffle([...opts]).forEach(v => {
+      const b = el('button', 'num-btn', String(v)); b.dataset.v = v;
+      b.addEventListener('click', async () => {
+        if (done) return; done = true; ac();
+        const good = [...dock.children].find(x => +x.dataset.v === ans), left = sl.filter(s => !s.classList.contains('eaten'));
+        good.classList.add('glow');
+        if (v === ans) {
+          S.ding(); earn(r, true);
+          for (let i = 0; i < left.length; i++) { left[i].append(el('span', 'badge', String(i + 1))); S.count(i); await wait(160); }
+          await say(`Yes! ${N} take away ${k} is ${ans}.`); if (!alive(tok)) return;
+        } else {
+          S.oops(); b.classList.add('shake'); earn(r, false);
+          await say("Let's count them."); if (!alive(tok)) return;
+          for (let i = 0; i < left.length; i++) { left[i].append(el('span', 'badge', String(i + 1))); S.count(i); await say(String(i + 1)); if (!alive(tok)) return; }
+          await say(`${ans} slices are left. ${N} take away ${k} is ${ans}.`); if (!alive(tok)) return;
+        }
+        await wait(600); if (!alive(tok)) return;
+        r++; r < RD.length ? round() : levelDone(tok);
+      });
+      dock.append(b);
+    });
+    await say('How many slices are left?');
+  }
+  round();
+} });
+
+/* ---------- Level 8: delivery to house numbers (1 to 10, then 11 to 20) ---------- */
+const HOUSE_COL = [['#ff8fc2', '#9a5ce0'], ['#ffd23f', '#e5483b'], ['#6fb7ff', '#3b5bd6'], ['#8fe08a', '#2d7a38'], ['#ffb36b', '#b5784a']];
+const houseSVG = (n, i) => { const [wall, roof] = HOUSE_COL[i % 5]; return `<svg viewBox="0 0 100 110"><rect x="12" y="42" width="76" height="64" rx="4" fill="${wall}" stroke="#3b2146" stroke-width="4"/><path d="M4 46 L50 8 L96 46 Z" fill="${roof}" stroke="#3b2146" stroke-width="4" stroke-linejoin="round"/><circle cx="50" cy="62" r="17" fill="#fffdf7" stroke="#3b2146" stroke-width="3.5"/><text class="hnum" x="50" y="70" text-anchor="middle">${n}</text><rect x="41" y="82" width="18" height="24" rx="3" fill="#3b2146"/><rect x="18" y="52" width="12" height="12" rx="2" fill="#bfe9ff" stroke="#3b2146" stroke-width="2.5"/><rect x="70" y="52" width="12" height="12" rx="2" fill="#bfe9ff" stroke="#3b2146" stroke-width="2.5"/></svg>`; };
+const SCOOTER = '<svg viewBox="0 0 130 100"><rect x="18" y="20" width="46" height="32" rx="4" fill="#fffdf7" stroke="#3b2146" stroke-width="4"/><circle cx="41" cy="36" r="9" fill="#e5483b"/><path d="M14 74 Q14 54 38 54 H86 L102 74 Z" fill="#e5483b" stroke="#3b2146" stroke-width="4" stroke-linejoin="round"/><path d="M96 70 L108 30 H120" stroke="#3b2146" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="28" cy="80" r="15" fill="#3b2146"/><circle cx="28" cy="80" r="6" fill="#c9ced6"/><circle cx="104" cy="80" r="15" fill="#3b2146"/><circle cx="104" cy="80" r="6" fill="#c9ced6"/></svg>';
+const BOX = n => `<svg viewBox="0 0 120 100"><rect x="8" y="20" width="104" height="72" rx="6" fill="#fffdf7" stroke="#3b2146" stroke-width="5"/><rect x="8" y="20" width="104" height="17" rx="6" fill="#e5483b" stroke="#3b2146" stroke-width="5"/><text class="boxn" x="60" y="81" text-anchor="middle">${n}</text></svg>`;
+LV.push({ icon: ICON[7], n: 6, start(tok) {
+  const T = [3, 8, 6, 15, 12, 18]; let r = 0, houses = [], road, scooter, sx = 0, done = true;
+  function street(b) {
+    lv.innerHTML = ''; lv.className = 'street'; houses = []; sx = 0;
+    const r1 = el('div', 'hrow'), r2 = el('div', 'hrow low'); road = el('div', 'road');
+    for (let i = 0; i < 10; i++) {
+      const n = b + i, h = el('button', 'house', houseSVG(n, i) + '<div class="hf"></div>');
+      h.dataset.n = n; h.setAttribute('aria-label', 'House ' + n); h.addEventListener('click', () => pickHouse(h));
+      (i < 5 ? r1 : r2).append(h); houses.push(h);
+    }
+    scooter = el('div', 'scooter', SCOOTER); road.append(scooter);
+    lv.append(r1, road, r2);
+  }
+  async function drive(h) {
+    const rr = road.getBoundingClientRect(), hr = h.getBoundingClientRect(), sw = scooter.getBoundingClientRect().width;
+    const tx = Math.max(0, Math.min(rr.width - sw, hr.left + hr.width / 2 - rr.left - sw / 2));
+    scooter.firstElementChild.style.transform = tx < sx ? 'scaleX(-1)' : '';
+    S.whoosh();
+    const an = scooter.animate([{ transform: `translate(${sx}px,-50%)` }, { transform: `translate(${tx}px,-50%)` }], { duration: Math.min(1500, 450 + Math.abs(tx - sx) * 1.3), easing: 'ease-in-out', fill: 'forwards' });
+    await new Promise(res => { an.onfinish = res; });
+    sx = tx; scooter.style.transform = `translate(${tx}px,-50%)`; an.cancel();
+  }
+  async function pickHouse(h) {
+    if (done) return; done = true; ac();
+    const n = T[r], good = houses.find(x => +x.dataset.n === n);
+    if (h === good) { S.pop(); earn(r, true); }
+    else {
+      S.oops(); h.classList.add('shake'); earn(r, false);
+      await say(`That is house ${h.dataset.n}.`); if (!alive(tok)) return;
+      h.classList.remove('shake'); good.classList.add('glow');
+      await say(`This is house ${n}.`); if (!alive(tok)) return;
+    }
+    await drive(good); if (!alive(tok)) return;
+    good.classList.remove('glow'); S.dingdong(); await wait(600); if (!alive(tok)) return;
+    const c = pick(CUST); good.querySelector('.hf').innerHTML = custSVG(c); good.classList.add('home');
+    const m = rel(good); hearts(m.x + m.w / 2, m.y, 4);
+    await say(`Pizza for ${c.nm}! Thank you!`); if (!alive(tok)) return;
+    await wait(400); if (!alive(tok)) return;
+    good.classList.remove('home'); r++;
+    if (r >= T.length) return levelDone(tok);
+    if (r === 3) { street(11); dock.innerHTML = ''; await say('Now a new street, with bigger numbers!'); if (!alive(tok)) return; }
+    ask();
+  }
+  function ask() { done = false; dock.innerHTML = ''; dock.append(el('div', 'pbox', BOX(T[r]))); say(`Take the pizza to house number ${T[r]}.`); }
+  street(1); dock.append(el('div', 'pbox', BOX(T[0])));
+  (async () => { await say('Time to deliver the pizzas!'); if (!alive(tok)) return; ask(); })();
+} });
+
+/* ---------- Level 9: pizza party (cut and feed) ---------- */
+LV.push({ icon: ICON[8], n: 0, start(tok) {
+  const c = pick(CUST), tt = shuffle([0, 1, 2, 3, 4, 5]).slice(0, 2);
+  const face = el('div', 'cust l9c', custSVG(c)), pw = el('div', 'l9pz', `<svg viewBox="-100 -100 200 200">${wedgesSVG(8, tt)}</svg>`);
+  lv.append(face, pw);
+  let cut = false, cutting = false, eaten = 0;
+  pw.addEventListener('pointerdown', async e => {
+    ac(); e.preventDefault();
+    if (!cut) {
+      if (cutting) return; cutting = true;
+      const p = rel(pw), d = p.w;
+      for (let i = 0; i < 4; i++) {
+        S.cut(); const l = el('div', 'cutline'); l.style.cssText = `left:${p.x}px;top:${p.y + d / 2 - 2.5}px;width:${d}px;--a:${i * 45}deg`; fxEl.append(l);
+        await wait(170); if (!alive(tok)) return;
+      }
+      await wait(250); if (!alive(tok)) return;
+      fxEl.querySelectorAll('.cutline').forEach(l => l.remove()); pw.classList.add('cut'); cut = true;
+      say(`Tap a slice to feed ${c.nm}!`); return;
+    }
+    const w = e.target.closest('.w'); if (!w || w.classList.contains('gone')) return;
+    w.classList.add('gone'); await feed(face, rel(w)); if (!alive(tok)) return;
+    if (++eaten === 8) { face.classList.add('jump'); await say('Yum! All gone!'); levelDone(tok, true); }
+  });
+  say(`Pizza party! ${c.nm} is hungry. Tap the pizza to cut it.`);
+} });
+
+/* ---------- boot ---------- */
+LV.forEach((L, i) => {
+  const b = el('button', 'dot', L.icon); b.setAttribute('aria-label', 'Level ' + (i + 1));
+  let t; b.addEventListener('pointerdown', () => { t = setTimeout(() => { ac(); startLevel(i); }, 700); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, () => clearTimeout(t)));
+  stepsEl.appendChild(b);
+});
+$('#mute').addEventListener('click', e => {
+  muted = !muted; e.currentTarget.classList.toggle('off', muted);
+  if (muted && 'speechSynthesis' in window) speechSynthesis.cancel();
+});
+new ResizeObserver(layout).observe(stage); window.addEventListener('resize', layout); layout();
+$('#play').addEventListener('click', () => { ac(); $('#intro').classList.add('gone'); startLevel(0); });
+</script>
+</body>
+</html>
